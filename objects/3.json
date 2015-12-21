@@ -1,0 +1,196 @@
+{
+    "id": 3,
+    "name": "Device",
+    "instancetype": "single",
+    "mandatory": true,
+    "description": "This LWM2M Object provides a range of device related information which can be queried by the LWM2M Server, and a device reboot and factory reset function.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "Manufacturer",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Human readable manufacturer name"
+      },
+      "1": {
+        "id": 1,
+        "name": "Model Number",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "A model identifier (manufacturer specified string)"
+      },
+      "2": {
+        "id": 2,
+        "name": "Serial Number",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Serial Number"
+      },
+      "3": {
+        "id": 3,
+        "name": "Firmware Version",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Current firmware version"
+      },
+      "4": {
+        "id": 4,
+        "name": "Reboot",
+        "operations": "E",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "",
+        "range": "",
+        "units": "",
+        "description": "Reboot the LWM2M Device to restore the Device from unexpected firmware failure."
+      },
+      "5": {
+        "id": 5,
+        "name": "Factory Reset",
+        "operations": "E",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "",
+        "range": "",
+        "units": "",
+        "description": "Perform factory reset of the LWM2M Device to make the LWM2M Device have the same configuration as at the initial deployment.\nWhen this Resource is executed, 'De-register' operation  MAY be sent to the LWM2M Server(s) before factory reset of the LWM2M Device."
+      },
+      "6": {
+        "id": 6,
+        "name": "Available Power Sources",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": false,
+        "type": "integer",
+        "range": "0-7",
+        "units": "",
+        "description": "0: DC power\n1: Internal Battery\n2: External Battery\n4: Power over Ethernet\n5: USB\n6: AC (Mains) power\n7: Solar"
+      },
+      "7": {
+        "id": 7,
+        "name": "Power Source Voltage",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "mV",
+        "description": "Present voltage for each Available Power Sources Resource Instance.\nEach Resource Instance ID MUST map to the value of Available Power Sources Resource."
+      },
+      "8": {
+        "id": 8,
+        "name": "Power Source Current",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "mA",
+        "description": "Present current for each Available Power Source"
+      },
+      "9": {
+        "id": 9,
+        "name": "Battery Level",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "0-100",
+        "units": "%",
+        "description": "Contains the current battery level as a percentage (with a range from 0 to 100). This value is only valid when the value of Available Power Sources Resource is 1."
+      },
+      "10": {
+        "id": 10,
+        "name": "Memory Free",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "KB",
+        "description": "Estimated current available amount of storage space which can store data and software in the LWM2M Device (expressed in kilobytes)."
+      },
+      "11": {
+        "id": 11,
+        "name": "Error Code",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "0: No error\n1: Low battery power\n2: External power supply off\n3: GPS module failure\n4: Low received signal strength\n5: Out of memory\n6: SMS failure\n7: IP connectivity failure\n8: Peripheral malfunction\n\nWhen the single Device Object Instance is initiated, there is only one error code Resource Instance whose value is equal to 0 that means no error. When the first error happens, the LWM2M Client changes error code Resource Instance to any non-zero value to indicate the error type. When any other error happens, a new error code Resource Instance is created.\nThis error code Resource MAY be observed by the LWM2M Server. How to deal with LWM2M Client's error report depends on the policy of the LWM2M Server."
+      },
+      "12": {
+        "id": 12,
+        "name": "Reset Error Code",
+        "operations": "E",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "",
+        "range": "",
+        "units": "",
+        "description": "Delete all error code Resource Instances and create only one zero-value error code that implies no error."
+      },
+      "13": {
+        "id": 13,
+        "name": "Current Time",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "time",
+        "range": "",
+        "units": "",
+        "description": "Current UNIX time of the LWM2M Client.\nThe LWM2M Client should be responsible to increase this time value as every second elapses.\nThe LWM2M Server is able to write this Resource to make the LWM2M Client synchronized with the LWM2M Server."
+      },
+      "14": {
+        "id": 14,
+        "name": "UTC Offset",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Indicates the UTC offset currently in effect for this LWM2M Device. UTC+X [ISO 8601]."
+      },
+      "15": {
+        "id": 15,
+        "name": "Timezone",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Indicates in which time zone the LWM2M Device is located, in IANA Timezone (TZ) database format."
+      },
+      "16": {
+        "id": 16,
+        "name": "Supported Binding and Modes",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Indicates which bindings and modes are supported in the LWM2M Client. The possible values of Resource are combination of \"U\" or \"UQ\" and \"S\" or \"SQ\"."
+      }
+    }
+}

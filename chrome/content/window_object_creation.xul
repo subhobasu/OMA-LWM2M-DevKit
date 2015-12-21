@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<window id = "window_object_creation"
+        title = "Create object"
+        xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        onload = "onLoad();"
+        onunload = "update_master_object_window_client_creation();" >
+
+<script>
+<![CDATA[
+
+var master_object_window_object_creation = null;
+
+function update_master_object_window_client_creation()
+{
+  if( master_object_window_object_creation != null ) //has been updated in the objects(added)...now always overwritten even if not updated...
+  {  
+    window.opener.master_object_window_client_creation = master_object_window_object_creation; //update opener master_object_window_client_creation   
+  }
+}
+
+
+function onLoad(){
+  master_object_window_object_creation = window.arguments[0]; //holds the master object from the client creation window...
+  document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+}
+
+  function createObject()
+  {
+    var json = {};
+    var item = "id";
+    var value = document.getElementById("textbox_create_object_id").value;
+    json[item]=value;
+    item = "name";
+    value = document.getElementById("textbox_create_object_name").value;
+    json[item]=value;
+    item = "instancetype";
+    value = document.getElementById("radiogroup_create_object_instance_type").selectedItem.value;
+    json[item]=value;
+    item = "mandatory";
+    value = (document.getElementById("checkbox_create_object_mandatory").checked);
+    json[item]=value;
+    item = "description";
+    value = document.getElementById("textbox_create_object_description").value;
+    json[item]=value;
+    item = "resourcedefs";
+    //var json1={"One":"1"};
+    //value = json1;
+    value={};
+    json[item]=value;
+
+    if( master_object_window_object_creation[json.id] == undefined)
+    {
+      master_object_window_object_creation[json.id] = json; alert("Created object");
+    }
+    else
+    {
+      master_object_window_object_creation[json.id] = json; alert("Object already existed...overwritten...");
+    }
+
+    var temp = JSON.stringify(json);
+    //alert(temp);
+    window.opener.opener.writeStringToFile('resource://objects',json.id, temp); //writes the object to disk
+    //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
+    //Lwm2mDevKit.objectDefinitions = master_object;
+  }
+
+]]>
+</script>
+
+
+   <hbox>
+     <textbox id="tb" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_id" value="Object Id:" />
+     <textbox id="textbox_create_object_id" value="Eg. 0" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_name" value="Object name:" />
+     <textbox id="textbox_create_object_name" value="Eg. LWM2M Security" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_instance_type" value="Instance type:" />
+     <radiogroup id="radiogroup_create_object_instance_type">
+       <radio id="radio_create_object_instance_type_single" label="Single" value="single" selected="true" />
+       <radio id="radio_create_object_instance_type_multiple" label="Multiple" value="multiple" />
+     </radiogroup>
+   </hbox>
+
+   <hbox>
+
+     <checkbox id="checkbox_create_object_mandatory" label="Mandatory" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_description" value="Description:" />
+     <textbox id="textbox_create_object_description" multiline="true" value="Eg. This LWM2M Object provides the keying material of a LWM2M Client..." />
+   </hbox>
+
+   <hbox>
+     <button id="button_create_object" label="Create object" oncommand="createObject(); window.opener.onLoad(); 
+	window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation, 
+	document.getElementById('textbox_create_object_id').value ); " />
+   </hbox>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+
+   <hbox>
+     <label id="label_added_resources" value="Added resources:" />
+   </hbox>
+
+   <hbox>
+     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject();" />
+   </hbox>
+
+   <hbox>
+     <label id="label_resource_definition" value="Resource definition:" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_id" value="Resource Id:" />
+     <textbox id="textbox_create_resource_id" value="0" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_name" value="Resource name:" />
+     <textbox id="textbox_create_resource_name" value="Eg. LWM2M Server URI" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_operations" value="Resource operations:" />
+     <textbox id="textbox_create_resource_operations" value="-" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_instance_type" value="Instance type:" />
+     <radiogroup id="radiogroup_create_resource_instance_type">
+       <radio id="radio_create_resource_instance_type_single" label="Single" value="single" />
+       <radio id="radio_create_resource_instance_type_multiple" label="Multiple" value="multiple" />
+     </radiogroup>
+   </hbox>
+
+   <hbox>
+     <checkbox id="checkbox_create_resource_mandatory" label="Mandatory" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_type" value="Resource type:" />
+     <textbox id="textbox_create_resource_type" value="string" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_range" value="Resource range:" />
+     <textbox id="textbox_create_resource_range" value="0-255 bytes" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_units" value="Resource units:" />
+     <textbox id="textbox_create_resource_units" value="" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_description" value="Resource description:" />
+     <textbox id="textbox_create_resource_description" value="Uniquely identifies the LWM2M Server..." />
+   </hbox>
+
+   <hbox>
+     <button id="button_done" label="Done" />
+   </hbox>
+
+
+-->
+
+</window>

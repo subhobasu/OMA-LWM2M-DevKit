@@ -73,6 +73,726 @@
 		<key key="u" oncommand="Lwm2mDevKit.Registration.update();" />
 		<key key="d" oncommand="Lwm2mDevKit.Registration.deregister();" />
 	</keyset>
+
+<!-- Subho -->
+
+ <panel id="panel_create_object">
+
+<!--   <textbox id="dummy" value="Dummy" />   -->
+
+   <hbox>
+     <label id="label_create_object_id" value="Object Id:" />
+     <textbox id="textbox_create_object_id" value="Eg. 0" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_name" value="Object name:" />
+     <textbox id="textbox_create_object_name" value="Eg. LWM2M Security" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_instance_type" value="Instance type:" />
+     <radiogroup id="radiogroup_create_object_instance_type">
+       <radio id="radio_create_object_instance_type_single" label="Single" value="single" selected="true" />
+       <radio id="radio_create_object_instance_type_multiple" label="Multiple" value="multiple" />
+     </radiogroup>
+   </hbox>
+
+   <hbox>
+
+     <checkbox id="checkbox_create_object_mandatory" label="Mandatory" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_object_description" value="Description:" />
+     <textbox id="textbox_create_object_description" multiline="true" value="Eg. This LWM2M Object provides the keying material of a LWM2M Client..." />
+   </hbox>
+
+
+<script type="application/x-javascript" charset="utf-8">
+<![CDATA[ //Cdata for less than operator
+
+var master_object = {};
+/*--------------------
+var str_temp = readStringFromFile('resource://objects',"master_object_file");
+if(str_temp == "" || str_temp == undefined)
+{
+ master_object = {};
+ writeStringToFile('resource://objects',"master_object_file", "{}");
+     alert("First creation of master");
+}
+else
+{
+  master_object = JSON.parse(str_temp);
+  //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
+}
+----------------------*/
+
+//creation of master_object-----------------------
+
+
+
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+var file1 = new FileUtils.File( readStringFromUrl('resource://objects') );
+
+var entries = file1.directoryEntries;
+var array = [];
+while(entries.hasMoreElements()) {
+  var entry = entries.getNext();
+  entry.QueryInterface(Components.interfaces.nsIFile);
+  array.push(entry);
+}
+
+var temp_array = [];
+for (let i in array)
+{
+ temp_array.push( array[i].path.split("/").pop().split('.')[0] );
+}
+
+ temp_array.sort();
+ array = temp_array;
+
+for(let i=0; i < array.length ; i++)
+{
+
+ if (  !(/^[0-9]+$/.test(array[i])) )
+ {continue;
+ }
+
+ var json = JSON.parse(readStringFromFile('resource://objects', array[i]));
+ master_object[array[i]] = json;
+}
+
+//--------------------------master_object created
+
+//alert(Object.keys(master_object).length);
+
+
+Lwm2mDevKit.objectDefinitions = master_object;
+writeStringToFile('resource://objects', "master_object_file", JSON.stringify(master_object));
+
+
+function update_Lwm2mDevKit_objectDefinitions()
+{ Lwm2mDevKit.objectDefinitions = master_object;
+  writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object)); //write the updated master_object to disk
+}
+
+
+  function createObject()
+  {
+    var json = {};
+    var item = "id";
+    var value = document.getElementById("textbox_create_object_id").value;
+    json[item]=value;
+    item = "name";
+    value = document.getElementById("textbox_create_object_name").value;
+    json[item]=value;
+    item = "instancetype";
+    value = document.getElementById("radiogroup_create_object_instance_type").selectedItem.value;
+    json[item]=value;
+    item = "mandatory";
+    value = (document.getElementById("checkbox_create_object_mandatory").checked);
+    json[item]=value;
+    item = "description";
+    value = document.getElementById("textbox_create_object_description").value;
+    json[item]=value;
+    item = "resourcedefs";
+    //var json1={"One":"1"};
+    //value = json1;
+    value={};
+    json[item]=value;
+
+    if(master_object[json.id] == undefined)
+    {
+      master_object[json.id] = json; alert("Created object");
+    }
+    else
+    {
+      master_object[json.id] = json; alert("Object already existed...overwritten...");
+    }
+
+    var temp = JSON.stringify(json);
+    //alert(temp);
+    writeStringToFile('resource://objects',json.id, temp);
+    writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
+    Lwm2mDevKit.objectDefinitions = master_object;
+  }
+
+  function writeStringToFile(url,filename, str) //filename, str
+  {
+    var path = readStringFromUrl(url);
+
+Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+
+// file is nsIFile, data is a string
+
+
+var file = new FileUtils.File(  path + "/" + filename + ".json");
+//var file = new FileUtils.File("/home/subho/Subho/Work/OMA/OMA-LWM2M-DevKit/objects/" + filename + ".json");
+var data = "";
+data = str;
+
+// You can also optionally pass a flags parameter here. It defaults to
+// FileUtils.MODE_WRONLY | FileUtils.MODE_CREATE | FileUtils.MODE_TRUNCATE;
+var ostream = FileUtils.openSafeFileOutputStream(file);
+
+var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+converter.charset = "UTF-8";
+var istream = converter.convertToInputStream(data);
+
+// The last argument (the callback) is optional.
+NetUtil.asyncCopy(istream, ostream, function(status) {
+  if (!Components.isSuccessCode(status)) {
+    // Handle error!
+    return;
+  }
+
+  // Data has been written to the file.
+
+}
+);
+
+  }
+
+  function readStringFromFile(url,filename) //returns the file contents as a string
+  {
+   var path = readStringFromUrl(url);
+
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+
+var file = new FileUtils.File( path + "/" + filename + ".json");
+//var file = new FileUtils.File("/home/subho/Subho/Work/OMA/OMA-LWM2M-DevKit/objects/" + filename + ".json");
+//var file = new FileUtils.File("chrome://lwm2m-devkit/../objects/" + filename + ".json");
+if(!file.exists())
+{ return;
+}
+var data = "";
+var fstream = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance(Components.interfaces.nsIFileInputStream);
+var cstream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].createInstance(Components.interfaces.nsIConverterInputStream);
+fstream.init(file, -1, 0, 0);
+cstream.init(fstream, "UTF-8", 0, 0); // you can use another encoding here if you wish
+
+let (str = {}) {
+  let read = 0;
+  do {
+    read = cstream.readString(0xffffffff, str); // read as much as we can and put it in str.value
+    data += str.value;
+  } while (read != 0);
+}
+cstream.close(); // this closes fstream
+
+  return data;
+
+  }
+
+//---------------------------------------------------------------------------
+
+function readStringFromUrl(aFileURL) //takes in a url eg: 'resource://objects' , returns the file.path as a string
+{
+//Components.utils.import("resource://gre/modules/FileUtils.jsm");
+//Components.utils.import("resource://gre/modules/NetUtil.jsm");
+//Components.utils.import("resource://gre/modules/Services.jsm");
+
+var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+var url = ios.newURI(aFileURL, null, null); // url is a nsIURI
+
+//alert(url.spec);
+
+var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
+//var file = FileUtils.getFile("UChrm", ["test.txt"]);
+//alert(file.path);
+
+//var str_array = file.path.split("/");
+//alert(str_array[str_array.length-1].split('.')[0]);
+
+
+/*
+
+var entries = file.directoryEntries;
+var array = [];
+while(entries.hasMoreElements()) {
+  var entry = entries.getNext();
+  entry.QueryInterface(Components.interfaces.nsIFile);
+  array.push(entry);
+}
+
+alert(array.length);
+alert(array[0].path);
+alert(array[1].path);
+
+*/
+
+return(file.path);
+
+/*
+  var ioService=Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+  var scriptableStream=Components.classes["@mozilla.org/scriptableinputstream;1"].getService(Components.interfaces.nsIScriptableInputStream);
+
+  var channel=ioService.newChannel(aURL,null,null);
+  var input=channel.open();
+  scriptableStream.init(input);
+  var str=scriptableStream.read(input.available());
+  scriptableStream.close();
+  input.close();
+  //return str;
+  alert(str);
+*/
+}
+
+function chromeToPath (aPath) {
+
+   if (!aPath || !(/^chrome:/.test(aPath)))
+      { alert("Nope");
+        return; //not a chrome url
+      }
+   var rv;
+   
+      var ios = Components.classes['@mozilla.org/network/io-service;1'].getService(Components.interfaces["nsIIOService"]);
+        var uri = ios.newURI(aPath, "UTF-8", null);
+        var cr = Components.classes['@mozilla.org/chrome/chrome-registry;1'].getService(Components.interfaces["nsIChromeRegistry"]);
+        rv = cr.convertChromeURL(uri).spec;
+
+        if (/^file:/.test(rv))
+          rv = this.urlToPath(rv);
+        else
+          rv = this.urlToPath("file://"+rv);
+
+      //return rv;
+      alert(rv);
+}
+
+function doXmlStuff () {alert("Hey");
+chromeToPath("chrome://lwm2m-devkit/content/1.json");
+   //var somefile = chromeToPath("chrome://lwm2m-devkit/content/1.json");
+/*   var xmlDoc;
+   var file = Components.classes["@mozilla.org/file/local;1"]
+         .createInstance(Components.interfaces.nsILocalFile);
+   file.initWithPath(somefile);
+   if (!(file.exists())) {
+      var fcStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+         .createInstance(Components.interfaces.nsIFileOutputStream);
+      fcStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
+
+      var data = 'Hello Tubai';
+      fcStream.write(data,data.length);
+      fcStream.close
+   }
+
+
+   xmlDoc = document.implementation.createDocument("","",null);
+   xmlDoc.load("chrome://piratequesting/content/trainingLog.xml");
+   xmlDoc.onload = function () {
+      xmlDoc.documentElement.appendChild(....whatever you want to append....);
+      var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+                         .createInstance(Components.interfaces.nsIFileOutputStream);
+      //clear the file for writing the new doc
+      foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
+      var ser = new XMLSerializer();
+      //write the serialized XML to file
+      ser.serializeToStream(xmlDoc, foStream, "");
+      foStream.close();   
+   }
+*/
+
+}
+
+//--------------------------------------------------------------------------
+
+  function createResourceInObject()
+  {
+    var filename = document.getElementById("textbox_create_object_id").value;
+    var str = readStringFromFile('resource://objects',filename);
+    var json = JSON.parse(str);
+
+    var new_json_obj = {};
+    var item = "id";
+    var value = document.getElementById("textbox_create_resource_id").value;
+    new_json_obj[item]=value;
+
+    item = "name";
+    value = document.getElementById("textbox_create_resource_name").value;
+    new_json_obj[item]=value;
+
+    item = "operations";
+    value = document.getElementById("textbox_create_resource_operations").value;
+    new_json_obj[item]=value;
+
+    item = "instancetype";
+    value = document.getElementById("radiogroup_create_resource_instance_type").selectedItem.value;
+    new_json_obj[item]=value;
+    
+    item = "mandatory";
+    value = (document.getElementById("checkbox_create_resource_mandatory").checked);
+    new_json_obj[item]=value;
+
+    item = "type";
+    value = (document.getElementById("textbox_create_resource_type").value);
+    new_json_obj[item]=value;
+
+    item = "range";
+    value = (document.getElementById("textbox_create_resource_range").value);
+    new_json_obj[item]=value;
+
+    item = "units";
+    value = (document.getElementById("textbox_create_resource_units").value);
+    new_json_obj[item]=value;
+
+    item = "description";
+    value = (document.getElementById("textbox_create_resource_description").value);
+    new_json_obj[item]=value;
+
+
+    //var temp = JSON.stringify(new_json_obj);
+    //alert(temp);
+
+    json.resourcedefs[document.getElementById("textbox_create_resource_id").value]=new_json_obj;
+    master_object[filename].resourcedefs[new_json_obj.id] = new_json_obj;
+    writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
+    Lwm2mDevKit.objectDefinitions = master_object;
+    var temp = JSON.stringify(json);
+    //alert(temp);
+    writeStringToFile('resource://objects',json.id, temp);
+
+    //json.resourcedefs[document.getElementById(textbox_create_resource_id).value]=new_json_obj;
+
+   //item = "resourcedefs";
+    //var json1={"One":"1"};
+    //value = json1;
+    //value={};
+    //json[item]=value;
+    //var temp = JSON.stringify(json);
+    //alert(temp);
+    //writeStringToFile('resource://objects',json.id, temp);
+    
+  }
+
+]]> //Cdata
+</script>
+
+
+
+   <hbox>
+     <button id="button_create_object" label="Create object" oncommand="createObject();" />
+   </hbox>
+
+   <hbox>
+     <label id="label_added_resources" value="Added resources:" />
+   </hbox>
+
+   <hbox>
+     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject();" />
+   </hbox>
+
+   <hbox>
+     <label id="label_resource_definition" value="Resource definition:" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_id" value="Resource Id:" />
+     <textbox id="textbox_create_resource_id" value="0" />     
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_name" value="Resource name:" />
+     <textbox id="textbox_create_resource_name" value="Eg. LWM2M Server URI" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_operations" value="Resource operations:" />
+     <textbox id="textbox_create_resource_operations" value="-" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_instance_type" value="Instance type:" />
+     <radiogroup id="radiogroup_create_resource_instance_type">
+       <radio id="radio_create_resource_instance_type_single" label="Single" value="single" />
+       <radio id="radio_create_resource_instance_type_multiple" label="Multiple" value="multiple" />
+     </radiogroup>
+   </hbox>
+
+   <hbox>
+     <checkbox id="checkbox_create_resource_mandatory" label="Mandatory" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_type" value="Resource type:" />
+     <textbox id="textbox_create_resource_type" value="string" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_range" value="Resource range:" />
+     <textbox id="textbox_create_resource_range" value="0-255 bytes" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_units" value="Resource units:" />
+     <textbox id="textbox_create_resource_units" value="" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_description" value="Resource description:" />
+     <textbox id="textbox_create_resource_description" value="Uniquely identifies the LWM2M Server..." />
+   </hbox>
+
+   <hbox>
+     <button id="button_done" label="Done" />
+   </hbox>
+
+ </panel>
+
+
+<script type="application/x-javascript" charset="utf-8">
+<![CDATA[ //Cdata for less than operator
+
+/*----------------------------------Moved to window_client_creation
+function move(from, to)
+{
+  var f = document.getElementById(from);
+  var t = document.getElementById(to);
+
+  
+  {//alert(f.itemCount);
+   //alert(f.selectedIndex);
+   //alert(f.selectedItem.label);
+   var sel = f.selectedItem;
+   f.removeChild(sel);
+   t.appendChild(sel);
+  }
+
+  //var json = {"name" : "Hello", "country" : "India"};
+  //var str = JSON.stringify(json);
+  //alert(str);
+
+}
+--------------------------------------------------------------------*/
+
+/*----------------------------------Moved to window_client_creation
+function createClient()
+{
+
+  if(Lwm2mDevKit.client != null)
+  {saveClientConfig();
+  }
+
+// Shows warning if any mandatory item is not added...
+
+  var listbox_available_objects = document.getElementById("listbox_available_objects");
+  var itemCount = listbox_available_objects.itemCount;
+
+  if(document.getElementById("checkbox_add_mandatory_objects").checked)
+  for(let i = 0; i < itemCount; i++)
+  {
+    if( Lwm2mDevKit.objectDefinitions[document.getElementById("listbox_available_objects").getItemAtIndex(i).value].mandatory)
+    {alert("WARNING!!! Some mandatory objects have NOT been added to the client...");
+     break;
+    }
+  }
+
+  var listbox = document.getElementById("listbox_selected_objects");
+  itemCount = listbox.itemCount;
+  //alert(itemCount);
+  itemCount--;
+  //var str = "";
+  //alert(listbox.getItemAtIndex(0).label);
+  var json = {"objects":[], "instances":{}, "attributes":{}};
+  while(itemCount >= 0)
+  {
+    json.instances[listbox.getItemAtIndex(itemCount).label]={};
+    json.objects.push(Number(listbox.getItemAtIndex(itemCount).label));
+    itemCount--;
+  }
+  //alert(JSON.stringify(json));
+  json.objects.sort();
+  json.endpointClientName=document.getElementById("textbox_client_name").value;
+  json.root="/";
+
+  Lwm2mDevKit.client = json;
+  var str = JSON.stringify(json);
+
+  var filename = document.getElementById("textbox_client_name").value; 
+  writeStringToFile('resource://clients',filename, str);
+  
+//
+
+//  var inner_json_empty = {};
+//  var json = {"instances":{}};
+//  var child = {};
+//  var i = "";
+//  while(listbox.hasChildNodes())
+//  { child = listbox.removeItemAt(0);
+//    //let i = "Hello";
+//   i = child.value;
+//    //alert(child.value);
+//    //let str = readStringFromFile('resource://objects',i);
+//    //let inner_json_empty = {};
+//    json.instances[i]=inner_json_empty;
+//  }
+  
+
+
+//var listbox = document.getElementById("listbox_available_objects");
+//var child = listbox.removeItemAt(0);
+//var str = child.label;
+//alert(str);
+
+//
+
+Lwm2mDevKit.clearTree();
+setClientTree(json);
+
+}
+--------------------------------------------------------------------*/
+
+
+
+function setClientTree(json) { //parameter json is the client object
+
+        let treeChildren = document.getElementById("tree_children");
+        //var str = readStringFromFile('resource://objects',document.getElementById("textbox_client_name").value);
+        //var json = JSON.parse(str);
+
+        let objects = json.objects;
+   //     let definitions = Lwm2mDevKit.objectDefinitions;
+
+        var rootItem = document.createElement("treeitem");
+        rootItem.setAttribute('container', 'true');
+        rootItem.setAttribute('open', 'true');
+
+        var rootRow = document.createElement("treerow");
+        var rootCell = document.createElement("treecell");
+        rootCell.setAttribute('properties', 'client');
+        rootCell.setAttribute('label', json.endpointClientName + ' (' + json.root + ')');
+
+        var rootCellTooltip = document.createElement("treecell");
+        rootCellTooltip.setAttribute('value', 'The LWM2M resources are not required to be in the root.');
+
+        rootRow.appendChild(rootCell);
+        rootRow.appendChild(rootCellTooltip);
+        rootItem.appendChild(rootRow);
+
+        let rootTreeChildren = document.createElement("treechildren");
+
+        for (let i in objects) {
+
+                //alert(i);
+
+                //let clientObjectDefinitions = definitions[i];
+                let clientObjectDefinitions = JSON.parse(readStringFromFile('resource://objects',objects[i]));
+                let instance = json.instances[objects[i]];
+
+                let treeItem = document.createElement("treeitem");
+                treeItem.setAttribute('container', 'true');
+                treeItem.setAttribute('open', 'true');
+
+                let treeRow = document.createElement("treerow");
+                let treeCell = document.createElement("treecell");
+                treeCell.setAttribute('properties', 'objects');
+                treeCell.setAttribute('label', clientObjectDefinitions.name + ' (' + objects[i] + ')' );
+                treeCell.setAttribute('value', objects[i]);
+
+                let treeCellTooltip = document.createElement("treecell");
+                treeCellTooltip.setAttribute('value', json.root + objects[i]);
+
+                treeRow.appendChild(treeCell);
+                treeRow.appendChild(treeCellTooltip);
+                treeItem.appendChild(treeRow);
+
+                let subTreeChildren = document.createElement("treechildren");
+
+                for (let key in instance) {
+                        let subTreeItem = document.createElement("treeitem");
+                        let subTreeRow = document.createElement("treerow");
+
+                        let subTreeCell = document.createElement("treecell");
+                        subTreeCell.setAttribute('properties', 'instances');
+                        subTreeCell.setAttribute('label', key);
+                        subTreeCell.setAttribute('value', objects[i] + '/' + key);
+
+                        let subTreeCellTooltip = document.createElement("treecell");
+                        subTreeCellTooltip.setAttribute('value', Lwm2mDevKit.client.root + objects[i] + '/' + key);
+
+                        subTreeRow.appendChild(subTreeCell);
+                        subTreeRow.appendChild(subTreeCellTooltip);
+                        subTreeItem.appendChild(subTreeRow);
+                        subTreeChildren.appendChild(subTreeItem);
+                        treeItem.appendChild(subTreeChildren);
+                }
+
+                rootTreeChildren.appendChild(treeItem);
+        }
+        rootItem.appendChild(rootTreeChildren);
+        treeChildren.appendChild(rootItem);
+}
+
+function loadSelectedClient()
+{
+
+  if(Lwm2mDevKit.client != null)
+  {saveClientConfig();
+  }
+
+  var str_selected_client = document.getElementById("listbox_list_of_saved_clients").selectedItem.value;
+  Lwm2mDevKit.client = JSON.parse(readStringFromFile('resource://clients',str_selected_client));
+  Lwm2mDevKit.clearTree();
+  setClientTree(Lwm2mDevKit.client);
+
+}
+
+]]> //Cdata
+</script>
+
+
+
+
+
+ <panel id="panel_create_client">
+   <vbox>
+     <hbox>
+       <label id="label_client_name" value="Client Name:" control="textbox_client_name" />
+       <textbox id="textbox_client_name" value="Client name" />
+     </hbox>
+
+     <hbox>
+       <groupbox flex="1">
+         <caption label="Available Objects"/>
+
+         <listbox id="listbox_available_objects" value2="10">
+          <!-- <listitem label="Perl" /> -->
+         </listbox>
+       </groupbox>
+
+     <vbox>
+       <spacer flex="1" />
+       <button id="button_move_right" label="Select" oncommand="move('listbox_available_objects','listbox_selected_objects');" />
+       <button id="button_move_left" label="Remove" oncommand="move('listbox_selected_objects','listbox_available_objects');"/>
+     </vbox>
+
+       <groupbox>
+         <caption label="Client objects" />
+
+         <listbox id="listbox_selected_objects">
+           
+         </listbox>
+       </groupbox>
+     </hbox>
+
+     <hbox>
+       <button id="button_new_object" label="New object" oncommand="document.getElementById('panel_create_client').hidePopup(); document.getElementById('panel_create_object').openPopup(document.getElementById('panel_create_client'), 'overlap', 0, 0);" />
+       <spacer flex="1" />
+       <checkbox id="checkbox_add_mandatory_objects" label="Add mandatory objects" checked="false" onclick="addMandatoryObjects(event);" />
+       <button id="button_create" label="Create" oncommand="createClient(); document.getElementById('panel_create_client').hidePopup(); 
+
+        document.getElementById('box_startup').hidden = false;
+        document.getElementById('box_object_instance').hidden = true;
+        document.getElementById('box_resource_values').hidden = true;
+        document.getElementById('box_object_definitions').hidden = true;
+        document.getElementById('box_resource_definitions').hidden = true; " />	
+     </hbox>
+   </vbox>
+ </panel>
+
+<!-- Subho -->
 	
 	<panel id="tooltip" consumeoutsideclicks="false" noautofocus="true" class="tooltip" style="opacity: 0.8; font-size: 18px; cursor: pointer; -moz-appearance: none; height: 200px; width: 200px; background-color: #BB3C36; color: white; border-radius: 100px; border: 3px solid white;">
 	<vbox id="tooltiptext" flex="1" align="center" pack="center" style="cursor: inherit;">
@@ -95,11 +815,31 @@
 		<vbox>
 			<button id="example_client" class="special-button" label="Example Client"
 				accesskey="E"
-				oncommand="Lwm2mDevKit.loadExampleClient(); document.getElementById('panel_device_loading').hidePopup();" />
+				oncommand="Lwm2mDevKit.loadExampleClient(); document.getElementById('panel_device_loading').hidePopup();
+
+        document.getElementById('box_startup').hidden = false;
+        document.getElementById('box_object_instance').hidden = true;
+        document.getElementById('box_resource_values').hidden = true;
+        document.getElementById('box_object_definitions').hidden = true;
+        document.getElementById('box_resource_definitions').hidden = true; " />
 			<separator />
+                        <listbox id="listbox_list_of_saved_clients" rows="5">
+                        </listbox>
+                        <button id="button_load" class="special-button" label="Load" onclick="loadSelectedClient(); 
+        document.getElementById('panel_device_loading').hidePopup();
+        document.getElementById('box_startup').hidden = false;
+        document.getElementById('box_object_instance').hidden = true;
+        document.getElementById('box_resource_values').hidden = true;
+        document.getElementById('box_object_definitions').hidden = true;
+        document.getElementById('box_resource_definitions').hidden = true; " />
+
 			<button id="load_from_file" class="special-button" label="New Client"
 				accesskey="N"
-				oncommand="alert('Custom objects and devices will be available soon...');" />
+                                oncommand="window.openDialog('chrome://lwm2m-devkit/content/window_client_creation.xul', 'window_client_creation', 'chrome,centerscreen,modal', master_object ); " />
+
+		<!--		oncommand="test(); document.getElementById('panel_device_loading').hidePopup(); document.getElementById('panel_create_client').openPopup();" />  
+                  -->
+
 		</vbox>
 	</panel>
 
@@ -383,7 +1123,249 @@
 
 			<hbox>
 				<button id="button_ping" style="min-width: 5em;" class="special-button" label="Ping" disabled="true" popup="panel_ping" />
-				<button id="button_load_device" flex="1" class="special-button" label="Load LWM2M Client" popup="panel_device_loading" />
+				<button id="button_load_device" flex="1" class="special-button" label="Load LWM2M Client" onclick="populate();" popup="panel_device_loading" />
+
+<!-- Subho -->
+
+<script type="application/x-javascript" charset="utf-8">
+<![CDATA[ //Cdata for less than operator
+
+function populate()
+{
+  var parent = document.getElementById("listbox_list_of_saved_clients");
+  while(parent.hasChildNodes())
+  {parent.removeItemAt(0);}
+
+/*
+  var json_temp = JSON.parse(readStringFromFile('resource://clients',"list_of_saved_clients"));
+  for (let i in json_temp.clients)
+  {
+
+  var child = document.createElement("listitem");
+  child.setAttribute('label', json_temp.clients[i]);
+  child.setAttribute('value', json_temp.clients[i]);
+  parent.appendChild(child);
+  }
+*/
+
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+var file1 = new FileUtils.File( readStringFromUrl('resource://clients') );
+
+var entries = file1.directoryEntries;
+var array = [];
+while(entries.hasMoreElements()) {
+  var entry = entries.getNext();
+  entry.QueryInterface(Components.interfaces.nsIFile);
+  array.push(entry);
+}
+
+var temp_array = [];
+for (let i in array)
+{
+ temp_array.push( array[i].path.split("/").pop().split('.')[0] );
+}
+
+ temp_array.sort();
+ array = temp_array;
+
+for(let i=0; i < array.length ; i++)
+{
+
+ if (  (/^example-client$/.test(array[i])) || (/^DEVKIT$/.test(array[i])) )
+ {continue;
+ }
+
+  var child = document.createElement("listitem");
+  child.setAttribute('label', array[i]);
+  child.setAttribute('value', array[i]);
+  parent.appendChild(child);
+
+}
+
+
+}
+
+  function test(){
+    let listbox_available_objects = document.getElementById('listbox_available_objects');
+    let listbox_selected_objects = document.getElementById('listbox_selected_objects');
+    //alert(listbox_available_objects.value2);
+    //alert("Test");
+    while(listbox_available_objects.hasChildNodes())
+         {listbox_available_objects.removeItemAt(0);}
+    while(listbox_selected_objects.hasChildNodes())
+         {listbox_selected_objects.removeItemAt(0);}
+    document.getElementById("checkbox_add_mandatory_objects").checked = false;
+    	let objectFile = "resource://objects/0.json";
+         var str="Hello";
+//         Components.utils.import("resource://gre/modules/NetUtil.jsm");
+//    	NetUtil.asyncFetch(objectFile, function(inputstream, status){
+//            if( Components.isSuccessCode(status) )
+//            { alert('Great to open file');
+//            }
+//            else
+//            { alert('Could not open file');
+//            }
+//            
+//            let data = Lwm2mDevKit.utf8Entities( NetUtil.readInputStreamToString(inputstream, inputstream.available(), {"charset": "UTF-8"}) );
+//            var dataObj = JSON.parse(data);
+//            str=dataObj.name;
+//            //alert(str);
+//        });
+
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+
+
+//--------
+
+
+var file1 = new FileUtils.File( readStringFromUrl('resource://objects') );
+
+var entries = file1.directoryEntries;
+var array = [];
+while(entries.hasMoreElements()) {
+  var entry = entries.getNext();
+  entry.QueryInterface(Components.interfaces.nsIFile);
+  array.push(entry);
+}
+
+var temp_array = [];
+for (let i in array)
+{
+ temp_array.push( array[i].path.split("/").pop().split('.')[0] );
+}
+
+ temp_array.sort();
+ array = temp_array;
+
+//--------
+
+
+
+for(let i=0; i < array.length ; i++)
+{
+
+ //if (  !(/[0-9]+\.json$/.test(array[i].path)) )
+ if (  !(/^[0-9]+$/.test(array[i])) )
+ {continue;
+ }
+ 
+ //alert(array[i].path);
+ //let temp = array[i].path.split("/");
+ //alert(temp.length);
+ //temp = array[temp.length-1].path;
+
+ //var file = new FileUtils.File(array[i].path);
+ var file = new FileUtils.File( readStringFromUrl('resource://objects') + "/" + array[i] + ".json" );
+
+//var file = new FileUtils.File( readStringFromUrl('resource://objects') + "/"  + i + ".json");
+
+//var file = new FileUtils.File("/home/subho/Subho/Work/OMA/OMA-LWM2M-DevKit/objects/" + i + ".json");
+//if(!file.exists())
+//{ return;
+//}
+
+
+var data = "";
+var fstream = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance(Components.interfaces.nsIFileInputStream);
+var cstream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].createInstance(Components.interfaces.nsIConverterInputStream);
+fstream.init(file, -1, 0, 0);
+cstream.init(fstream, "UTF-8", 0, 0); // you can use another encoding here if you wish
+
+let (str = {}) {
+  let read = 0;
+  do { 
+    read = cstream.readString(0xffffffff, str); // read as much as we can and put it in str.value
+    data += str.value;
+  } while (read != 0);
+}
+cstream.close(); // this closes fstream
+
+//alert(data);
+
+
+
+
+    //alert(str);
+    let listitem = document.createElement('listitem');
+    var dataObj = JSON.parse(data);
+    str = dataObj.id;
+    listitem.setAttribute('label', str);
+    listitem.setAttribute('value', str);
+    listbox_available_objects.appendChild(listitem);
+}
+    //document.getElementById('panel_create_client').openPopup();
+
+  }
+
+/*-------------------------------------------Moved to window_client_creation
+function addMandatoryObjects(e)
+{
+ var f = document.getElementById("listbox_available_objects");
+ var t = document.getElementById("listbox_selected_objects");
+
+//
+    if(!e.target.checked)
+    {
+      var array_del = [];
+      var itemCount = f.itemCount;
+      for (let i=0, j=0; i < itemCount; i++)
+      {
+       
+        if( Lwm2mDevKit.objectDefinitions[f.getItemAtIndex(j).value].mandatory )
+        {
+
+          var sel = f.getItemAtIndex(j);
+          f.removeChild(sel);
+          t.appendChild(sel);
+
+        }
+        else
+        {
+          j++;
+        }
+     
+      }
+    }
+
+//
+}
+--------------------------------------------------------------------*/
+
+function saveClientConfig()
+{
+  var filename = Lwm2mDevKit.client.endpointClientName;
+  writeStringToFile('resource://clients',filename, JSON.stringify(Lwm2mDevKit.client));
+
+/*
+  //entry in list_of_saved_clients
+  var str = readStringFromFile('resource://clients',"list_of_saved_clients");
+  if(str===undefined) //file non-existing
+  {var json_temp = {"clients":[]};
+   json_temp.clients.push(Lwm2mDevKit.client.endpointClientName);
+   writeStringToFile('resource://clients',"list_of_saved_clients", JSON.stringify(json_temp));
+  }
+  else //file exists
+  { var json_temp = JSON.parse(str);
+    if(json_temp.clients.indexOf(Lwm2mDevKit.client.endpointClientName)==-1)
+    {json_temp.clients.push(Lwm2mDevKit.client.endpointClientName);
+     writeStringToFile('resource://clients',"list_of_saved_clients", JSON.stringify(json_temp));
+    }
+    else
+    {alert("The client \"" + Lwm2mDevKit.client.endpointClientName + "\" already exists...not overwriting");
+    }
+  }
+
+*/
+
+}
+
+]]> //Cdata
+</script>
+
+<!-- <button id="button_create_device" flex="1" label="Create LWM2M Client" class="special-button" oncommand="test(); document.getElementById('panel_create_client').openPopup();"  /> -->
+
+<!-- Subho -->
+
 			</hbox>
 			
 			<!-- resource tree -->
@@ -421,6 +1403,10 @@
 				<button id="button_service" class="special-button" label="Device Management &amp; Service Enablement" popup="panel_service" disabled="true" />
 				<button id="button_reporting" class="special-button" label="Information Reporting" popup="panel_reporting" disabled="true" />
 				<separator flex="1" />
+                  <!--     <button id="button_save" class="special-button" label="Save client config" onclick="saveClientConfig();" />  -->
+        <!--     <button id="button_test1" class="special-button" label="Dummy1" onclick="readStringFromUrl('resource://objects/');" /> -->
+        <!--     <button id="button_test2" class="special-button" label="Dummy2" onclick="doXmlStuff();" />                             -->
+             <button id="button_test3" class="special-button" label="Dummy3" onclick="alert(JSON.stringify(Lwm2mDevKit.objectDefinitions));" />
 				<button id="button_preferences" class="special-button" style="width: 3.3em; min-width: 3.3em;" oncommand="window.openDialog('chrome://lwm2m-devkit/content/options.xul', 'Prefs', 'chrome,titlebar,toolbar,centerscreen,modal'); Lwm2mDevKit.loadBehavior();"><label style="margin: -16px 0 -10px 0; font-size: 220%;" value="≡" /></button>
 			</hbox>
 			

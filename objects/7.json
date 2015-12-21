@@ -1,0 +1,86 @@
+{
+    "id": 7,
+    "name": "Connectivity Statistics",
+    "instancetype": "single",
+    "mandatory": false,
+    "description": "This LWM2M Objects enables client to collect statistical information and enables the LWM2M Server to retrieve these information, set the collection duration and reset the statistical parameters.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "SMS Tx Counter",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "Indicate the total number of SMS successfully transmitted during the collection period."
+      },
+      "1": {
+        "id": 1,
+        "name": "SMS Rx Counter",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "Indicate the total number of SMS successfully received during the collection period."
+      },
+      "2": {
+        "id": 2,
+        "name": "Tx Data",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "Kilo-Bytes",
+        "description": "Indicate the total amount of data transmitted during the collection period."
+      },
+      "3": {
+        "id": 3,
+        "name": "Rx Data",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "Kilo-Bytes",
+        "description": "Indicate the total amount of data received during the collection period."
+      },
+      "4": {
+        "id": 4,
+        "name": "Max Message Size",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "Byte",
+        "description": "The maximum message size that is used during the collection period."
+      },
+      "5": {
+        "id": 5,
+        "name": "Average Message Size",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "Byte",
+        "description": "The average message size that is used during the collection period."
+      },
+      "6": {
+        "id": 6,
+        "name": "StartOrReset",
+        "operations": "E",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "",
+        "range": "",
+        "units": "",
+        "description": "Start to collect information or reset all other Resources to zeros in this Object. For example, the first time this Resource is executed, the client starts to collect information. The second time this Resource is executed, the values of Resource 0~5 are reset to 0."
+      }
+    }
+}

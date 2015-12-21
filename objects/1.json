@@ -1,0 +1,108 @@
+{
+    "id": 1,
+    "name": "LWM2M Server",
+    "instancetype": "multiple",
+    "mandatory": true,
+    "description": "This LWM2M Objects provides the data related to a LWM2M Server. A Bootstrap Server has no such an Object Instance associated to it.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "Short Server ID",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "1-65535",
+        "units": "",
+        "description": "Used as link to associate server Object Instance."
+      },
+      "1": {
+        "id": 1,
+        "name": "Lifetime",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "s",
+        "description": "Specify the lifetime of the registration in seconds."
+      },
+      "2": {
+        "id": 2,
+        "name": "Default Minimum Period",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "s",
+        "description": "The default value the LWM2M Client should use for the Minimum Period of an Observation in the absence of this parameter being included in an Observation.\nIf this Resource doesn't exist, the default value is 1."
+      },
+      "3": {
+        "id": 3,
+        "name": "Default Maximum Period",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "s",
+        "description": "The default value the LWM2M Client should use for the Maximum Period of an Observation in the absence of this parameter being included in an Observation."
+      },
+      "4": {
+        "id": 4,
+        "name": "Disable",
+        "operations": "E",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "",
+        "range": "",
+        "units": "",
+        "description": "If this Resource is executed, this LWM2M Server Object is disabled for a certain period defined in the Disabled Timeout Resource. After receiving 'Execute' operation, LWM2M Client MUST send response of the operation and perform de-registration process, and underlying network connection between the Client and Server MUST be disconnected to disable the LWM2M Server account.\nAfter the above process, the LWM2M Client MUST NOT send any message to the Server and ignore all the messages from the LWM2M Server for the period."
+      },
+      "5": {
+        "id": 5,
+        "name": "Disable Timeout",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "s",
+        "description": "A period to disable the Server. After this period, the LWM2M Client MUST perform registration process to the Server. If this Resource is not set, a default timeout value is 86400 (1 day)."
+      },
+      "6": {
+        "id": 6,
+        "name": "Notification Storing When Disabled or Offline",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "boolean",
+        "range": "",
+        "units": "",
+        "description": "If true, the LWM2M Client stores 'Notify' operations to the LWM2M Server while the LWM2M Server account is disabled or the LWM2M Client is offline. After the LWM2M Server account is enabled or the LWM2M Client is online, the LWM2M Client reports the stored 'Notify' operations to the Server.\nIf false, the LWM2M Client discards all the 'Notify' operationsor temporally disables the Observe function while the LWM2M Server is disabled or the LWM2M Client is offline.\nThe default value is true.\nThe maximum number of storing Notification per the Server is up to the implementation."
+      },
+      "7": {
+        "id": 7,
+        "name": "Binding",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "string",
+        "range": "The possible values of Resource are listed in 5.2.1.1",
+        "units": "",
+        "description": "This Resource defines the transport binding configured for the LWM2M Client.\nIf the LWM2M Client supports the binding specified in this Resource, the LWM2M Client MUST use that for Current Binding and Mode."
+      },
+      "8": {
+        "id": 8,
+        "name": "Registration Update Trigger",
+        "operations": "E",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "",
+        "range": "",
+        "units": "",
+        "description": "If this Resource is executed the LWM2M Client MUST perform an 'Update' operation with this LWM2M Server using the Current Transport Binding and Mode."
+      }
+    }
+}

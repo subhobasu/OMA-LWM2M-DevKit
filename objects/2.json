@@ -1,0 +1,53 @@
+{
+    "id": 2,
+    "name": "LWM2M Access Control",
+    "instancetype": "multiple",
+    "mandatory": false,
+    "description": "Access Control Object is used to check whether the LWM2M Server has access right for performing a operation.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "Object ID",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "1-65534",
+        "units": "",
+        "description": "The Object ID and The Object Instance ID are applied for."
+      },
+      "1": {
+        "id": 1,
+        "name": "Object Instance ID",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "0-65535",
+        "units": "",
+        "description": "See Table 14: LWM2M Identifiers."
+      },
+      "2": {
+        "id": 2,
+        "name": "ACL",
+        "operations": "RW",
+        "instancetype": "multiple",
+        "mandatory": false,
+        "type": "integer",
+        "range": "16-bit",
+        "units": "",
+        "description": "Resource Instance ID MUST be the Short Server ID of a certain LWM2M Server which has an access right.\nResource Instance ID 0 is for default Short Server ID.\nThe Value of the Resource Instance contains the access rights.\nSetting each bit means the LWM2M Server has the access right for that operation. The bit order is specified as below.\n1st lsb: R(Read, Observe, Discover, Write Attributes)\n2nd lsb: W(Write)\n3rd lsb: E(Execute)\n4th lsb: D(Delete)\n5th lsb: C(Create)\nOther bits are reserved for future use"
+      },
+      "3": {
+        "id": 3,
+        "name": "Access Control Owner",
+        "operations": "RW",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "0-65535",
+        "units": "",
+        "description": "Short Server ID of a certain LWM2M Server. Only this LWM2M Server can manage these Resources of the Object Instance.\nValue MAX_ID=65535 is reserved for the Access Control Object Instances created during Bootstrap procedure."
+      }
+    }
+}

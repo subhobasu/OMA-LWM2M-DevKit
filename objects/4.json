@@ -1,0 +1,130 @@
+{
+    "id": 4,
+    "name": "Connectivity Monitoring",
+    "instancetype": "single",
+    "mandatory": false,
+    "description": "This LWM2M Object enables monitoring of parameters related to network connectivity.\nIn this general connectivity Object, the Resources are limited to the most general cases common to most network bearers. It is recommended to read the description, which refers to relevant standard development organizations (e.g. 3GPP, IEEE).\nThe goal of the Connectivity Monitoring Object is to carry information reflecting the more up to date values of the current connection for monitoring purposes. Resources such as Link Quality, Radio Signal Strenght, Cell ID are retrieved during connected mode at least for cellular networks.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "Network Bearer",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "Indicates the network bearer used for the current LWM2M communication session from the below network bearer list.\n0~20 are Cellular Bearers\n0: GSM cellular network\n1: TD-SCDMA cellular network\n2: WCDMA cellular network\n3: CDMA2000 cellular network\n4: WiMAX cellular network\n5: LTE-TDD cellular network\n6: LTE-FDD cellular network\n7~20: Reserved for other type cellular network\n21~40 are Wireless Bearers\n21: WLAN network\n22: Bluetooth network\n23: IEEE 802.15.4 network\n24~40: Reserved for other type local wireless network\n41~50 are Wireline Bearers\n41: Ethernet\n42: DSL\n43: PLC\n44~50: reserved for others type wireline networks."
+      },
+      "1": {
+        "id": 1,
+        "name": "Available Network Bearer",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "Indicates list of current available network bearer. Each Resource Instance has a value from the network bearer list."
+      },
+      "2": {
+        "id": 2,
+        "name": "Radio Signal Strength",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "dBm",
+        "description": "This node contains the average value of the received signal strength indication used in the current network bearer in case Network Bearer Resource indicates a Cellular Network (RXLEV range 0..64) 0 is < 110dBm, 64 is > -48 dBm).\nRefer to [3GPP 44.018] for more details on Network Measurement Report encoding and [3GPP 45.008] or for Wireless Networks refer to the appropriate wireless standard."
+      },
+      "3": {
+        "id": 3,
+        "name": "Link Quality",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "This contains received link quality  e.g., LQI for IEEE 802.15.4, (Range (0..255)), RxQual Downlink (for GSM range is 0..7).\nRefer to [3GPP 44.018] for more details on Network Measurement Report encoding."
+      },
+      "4": {
+        "id": 4,
+        "name": "IP Addresses",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": true,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "The IP addresses assigned to the connectivity interface. (e.g. IPv4, IPv6, etc.)"
+      },
+      "5": {
+        "id": 5,
+        "name": "Router IP Addresse",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "The IP address of the next-hop IP router.\nNote: This IP Address doesn't indicate the Server IP address."
+      },
+      "6": {
+        "id": 6,
+        "name": "Link Utilization",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "0-100",
+        "units": "%",
+        "description": "The average utilization of the link to the next-hop IP router in %."
+      },
+      "7": {
+        "id": 7,
+        "name": "APN",
+        "operations": "R",
+        "instancetype": "multiple",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "",
+        "description": "Access Point Name in case Network Bearer Resource is a Cellular Network."
+      },
+      "8": {
+        "id": 8,
+        "name": "Cell ID",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "Serving Cell ID in case Network Bearer Resource is a Cellular Network.\nAs specified in TS [3GPP 23.003] and in [3GPP. 24.008]. Range (0..65535) in GSM/EDGE\nUTRAN Cell ID has a length of 28 bits.\nCell Identity  in WCDMA/TD-SCDMA. Range: (0..268435455).\nLTE Cell ID has a length of 28 bits.\nParameter definitions in [3GPP 25.331]."
+      },
+      "9": {
+        "id": 9,
+        "name": "SMNC",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "%",
+        "description": "Serving Mobile Network Code. In case Network Bearer Resource has 0(cellular network). Range (0..999).\nAs specified in TS [3GPP 23.003]."
+      },
+      "10": {
+        "id": 10,
+        "name": "SMCC",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "Serving Mobile Country Code. In case Network Bearer Resource has 0 (cellular network). Range (0..999).\nAs specified in TS [3GPP 23.003]."
+      }
+    }
+}

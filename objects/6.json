@@ -1,0 +1,75 @@
+{
+    "id": 6,
+    "name": "Location",
+    "instancetype": "single",
+    "mandatory": false,
+    "description": "This LWM2M Objects provide a range of device related information which can be queried by the LWM2M Server, and a device reboot and factory reset function.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "Latitude",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "string",
+        "range": "",
+        "units": "Deg",
+        "description": "The decimal notation of latitude, e.g. -43.5723 [World Geodetic System 1984]."
+      },
+      "1": {
+        "id": 1,
+        "name": "Longitude",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "string",
+        "range": "",
+        "units": "Deg",
+        "description": "The decimal notation of longitude, e.g. 153.21760 [World Geodetic System 1984]."
+      },
+      "2": {
+        "id": 2,
+        "name": "Altitude",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "m",
+        "description": "The decimal notation of altitude in meters above sea level."
+      },
+      "3": {
+        "id": 3,
+        "name": "Uncertainty",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "string",
+        "range": "",
+        "units": "m",
+        "description": "The accuracy of the position in meters."
+      },
+      "4": {
+        "id": 4,
+        "name": "Velocity",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "opaque",
+        "range": "",
+        "units": "Refers to 3GPP GAD specs",
+        "description": "The velocity of the device as defined in 3GPP 23.032 GAD specification. This set of values may not be available if the device is static."
+      },
+      "5": {
+        "id": 5,
+        "name": "Timestamp",
+        "operations": "R",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "time",
+        "range": "0-6",
+        "units": "",
+        "description": "The timestamp of when the location measurement was performed."
+      }
+    }
+}

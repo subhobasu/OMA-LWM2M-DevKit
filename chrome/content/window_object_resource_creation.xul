@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<window id = "window_object_resource_creation"
+        title = "Create resource in object"
+        xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        onload = "onLoad();"
+        onunload = "update_master_object_window_object_creation();" >
+
+<script>
+<![CDATA[
+
+var master_object_window_object_resource_creation = null;
+
+function update_master_object_window_object_creation()
+{
+  if( master_object_window_object_resource_creation != null ) //has been updated in the resources in objects(added)...now always overwritten even if not updated...
+  {
+    window.opener.master_object_window_object_creation = master_object_window_object_resource_creation; //update opener master_object_window_object_creation
+  }
+}
+
+
+function onLoad(){
+  master_object_window_object_resource_creation = window.arguments[0]; //holds the master object from the object creation window...
+  document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+}
+
+
+
+  function createResourceInObject()
+  {
+    var filename = window.arguments[1];
+    var str = window.opener.opener.opener.readStringFromFile('resource://objects',filename);
+    var json = JSON.parse(str);
+    //alert(JSON.stringify(json));
+
+
+
+    var new_json_obj = {};
+    var item = "id";
+    var value = document.getElementById("textbox_create_resource_id").value;
+    new_json_obj[item]=value;
+
+    item = "name";
+    value = document.getElementById("textbox_create_resource_name").value;
+    new_json_obj[item]=value;
+
+    item = "operations";
+    value = document.getElementById("textbox_create_resource_operations").value;
+    new_json_obj[item]=value;
+
+    item = "instancetype";
+    value = document.getElementById("radiogroup_create_resource_instance_type").selectedItem.value;
+    new_json_obj[item]=value;
+
+    item = "mandatory";
+    value = (document.getElementById("checkbox_create_resource_mandatory").checked);
+    new_json_obj[item]=value;
+
+    item = "type";
+    value = (document.getElementById("textbox_create_resource_type").value);
+    new_json_obj[item]=value;
+
+    item = "range";
+    value = (document.getElementById("textbox_create_resource_range").value);
+    new_json_obj[item]=value;
+
+    item = "units";
+    value = (document.getElementById("textbox_create_resource_units").value);
+    new_json_obj[item]=value;
+
+    item = "description";
+    value = (document.getElementById("textbox_create_resource_description").value);
+    new_json_obj[item]=value;
+
+    json.resourcedefs[document.getElementById("textbox_create_resource_id").value]=new_json_obj;
+    master_object_window_object_resource_creation[filename].resourcedefs[new_json_obj.id] = new_json_obj;
+    //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
+    //Lwm2mDevKit.objectDefinitions = master_object;
+    var temp = JSON.stringify(json);
+    //alert(temp);
+    window.opener.opener.opener.writeStringToFile('resource://objects',json.id, temp);
+
+    //json.resourcedefs[document.getElementById(textbox_create_resource_id).value]=new_json_obj;
+
+   //item = "resourcedefs";
+    //var json1={"One":"1"};
+    //value = json1;
+    //value={};
+    //json[item]=value;
+    //var temp = JSON.stringify(json);
+    //alert(temp);
+    //writeStringToFile('resource://objects',json.id, temp);
+
+
+
+  }
+
+
+
+
+
+
+]]>
+</script>
+
+
+   <hbox>
+     <label id="label_added_resources" value="Added resources:" />
+   </hbox>
+
+
+   <hbox>
+     <label id="label_resource_definition" value="Resource definition:" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_id" value="Resource Id:" />
+     <textbox id="textbox_create_resource_id" value="0" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_name" value="Resource name:" />
+     <textbox id="textbox_create_resource_name" value="Eg. LWM2M Server URI" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_operations" value="Resource operations:" />
+     <textbox id="textbox_create_resource_operations" value="-" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_instance_type" value="Instance type:" />
+     <radiogroup id="radiogroup_create_resource_instance_type">
+       <radio id="radio_create_resource_instance_type_single" label="Single" value="single" />
+       <radio id="radio_create_resource_instance_type_multiple" label="Multiple" value="multiple" />
+     </radiogroup>
+   </hbox>
+
+   <hbox>
+     <checkbox id="checkbox_create_resource_mandatory" label="Mandatory" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_type" value="Resource type:" />
+     <textbox id="textbox_create_resource_type" value="string" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_range" value="Resource range:" />
+     <textbox id="textbox_create_resource_range" value="0-255 bytes" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_units" value="Resource units:" />
+     <textbox id="textbox_create_resource_units" value="" />
+   </hbox>
+
+   <hbox>
+     <label id="label_create_resource_description" value="Resource description:" />
+     <textbox id="textbox_create_resource_description" value="Uniquely identifies the LWM2M Server..." />
+   </hbox>
+
+   <hbox>
+     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject();" />
+     <spacer flex="1" />
+     <button id="button_finish" label="Finish" oncommand="close();" />
+   </hbox>
+
+
+<!--
+   <hbox>
+     <button id="button_done" label="Done" />
+   </hbox>
+-->
+
+</window>

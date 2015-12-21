@@ -1,0 +1,141 @@
+{
+    "id": 0,
+    "name": "LWM2M Security",
+    "instancetype": "multiple",
+    "mandatory": true,
+    "description": "This LWM2M Object provides the keying material of a LWM2M Client appropriate to access a specified LWM2M Server. One Object Instance SHOULD address a LWM2M Bootstrap Server.\n    These LWM2M Object Resources MUST only be changed by a LWM2M Bootstrap Server or Bootstrap from Smartcardand MUST NOT be accessible by any other LWM2M Server.",
+    "resourcedefs": {
+      "0": {
+        "id": 0,
+        "name": "LWM2M  Server URI",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "string",
+        "range": "0-255 bytes",
+        "units": "",
+        "description": "Uniquely identifies the LWM2M Server or LWM2M Bootstrap Server, and is in the form:\n\"coaps://host:port\", where host is an IP address or FQDN, and port is the UDP port of the Server."
+      },
+      "1": {
+        "id": 1,
+        "name": "Bootstrap Server",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "boolean",
+        "range": "",
+        "units": "",
+        "description": "Determines if the current instance concerns a LWM2M Bootstrap Server (true) or a standard LWM2M Server (false)"
+      },
+      "2": {
+        "id": 2,
+        "name": "Security Mode",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "0-3",
+        "units": "",
+        "description": "Determines which UDP payload security mode is used\n0: Pre-Shared Key mode\n1: Raw Public Key mode\n2: Certificate mode\n3: NoSec mode"
+      },
+      "3": {
+        "id": 3,
+        "name": "Public Key or Identity",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "opaque",
+        "range": "",
+        "units": "",
+        "description": "Stores the LWM2M Client's Certificate (Certificate mode), public key (RPK mode) or PSK Identity (PSK mode). The format is defined in Section E.1.1."
+      },
+      "4": {
+        "id": 4,
+        "name": "Server Public Key or Identity",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "opaque",
+        "range": "",
+        "units": "",
+        "description": "Stores the LWM2M Server's or LWM2M Bootstrap Server's Certificate (Certificate mode), public key (RPK mode) or PSK Identity (PSK mode). The format is defined in Section E.1.1."
+      },
+      "5": {
+        "id": 5,
+        "name": "Secret Key",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "opaque",
+        "range": "",
+        "units": "",
+        "description": "Stores the secret key or private key of the security mode. The format of the keying material is defined by the security mode in  Section E.1.1. This Resource MUST only be changed by a bootstrap server and MUST NOT be readable by any server."
+      },
+      "6": {
+        "id": 6,
+        "name": "SMS Security Mode",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "0-255",
+        "units": "",
+        "description": "Determines which SMS payload security mode is used (see section 7.2)\n0: Reserved for future use\n1: Secure Packet Structure mode device terminated\n2: Secure Packet Structure mode smartcard terminated\n3: NoSec mode\n255: Proprietary modes"
+      },
+      "7": {
+        "id": 7,
+        "name": "SMS Binding Key Parameters",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "opaque",
+        "range": "6 bytes",
+        "units": "",
+        "description": "Stores the KIc, KID, SPI and TAR. The format is defined in Section D.1.2."
+      },
+      "8": {
+        "id": 8,
+        "name": "SMS Binding Secret Keys",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "opaque",
+        "range": "32-48 bytes",
+        "units": "",
+        "description": "Stores the values of the keys for the SMS binding. \nThis resource MUST only be changed by a bootstrap server and MUST NOT be readable by any server."
+      },
+      "9": {
+        "id": 9,
+        "name": "LWM2M Server SMS Number",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "",
+        "description": "MSISDN used by the LWM2M Client  to send messages to the LWM2M Server via the SMS binding. \nThe LWM2M Client SHALL silently ignore any SMS not originated from unknown MSISDN"
+      },
+      "10": {
+        "id": 10,
+        "name": "Short Server ID",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": false,
+        "type": "integer",
+        "range": "1-65535",
+        "units": "",
+        "description": "This identifier uniquely identifies each LWM2M Server configured for the LWM2M Client.\nThis Resource MUST be set when the Bootstrap Server Resource has false value.\nDefault Short Server ID (i.e. 0) MUST NOT be used for identifying the LWM2M Server."
+      },
+      "11": {
+        "id": 11,
+        "name": "Client Hold Off Time",
+        "operations": "-",
+        "instancetype": "single",
+        "mandatory": true,
+        "type": "integer",
+        "range": "",
+        "units": "s",
+        "description": "Relevant information for a Bootstrap Server only.\nThe number of seconds to wait before initiating a Client Initiated Bootstrap once the LWM2M Client has determined it should initiate this bootstrap mode"
+      }
+    }
+}

@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<!--
+
+<window onload="onLoad();" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<script><![CDATA[
+
+var gStatus, gProgressMeter;
+var maxProgress = 100;
+
+function onLoad() {
+  gStatus = document.getElementById("status");
+  gProgressMeter = document.getElementById("progressmeter");
+  
+  if("arguments" in window && window.arguments.length > 0) {
+    maxProgress = window.arguments[0].maxProgress;
+    setProgress(window.arguments[0].progress);
+    setStatus(window.arguments[0].status);
+  }
+  //document.getElementById("tb").value=window.arguments[1].name;
+  
+}
+
+function setProgress(value) {
+  gProgressMeter.value = 100 * value / maxProgress;
+}
+
+function setStatus(text) {
+  gStatus.value = "Status: " + text + "...";
+}
+
+]]></script>
+
+ 
+<label id="status" value="(No status)" />
+<hbox>
+  <progressmeter id="progressmeter" mode="determined" />
+  <button label="Cancel" oncommand="close();" />
+  <textbox id="tb" />
+  <button label="Click Me" oncommand="opener.document.getElementById('button_test3').label=document.getElementById('tb').value ;" />
+</hbox>
+
+-->
+
+<window id = "window_client_creation"
+        title = "Create client"
+        xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        onload = "onLoad();"
+        onunload = "update_master_object();" >
+
+<script>
+<![CDATA[
+
+var master_object_window_client_creation = null;
+
+function update_master_object()
+{
+  if( master_object_window_client_creation != null ) //has been updated in the objects(added)
+  {  window.opener.master_object = master_object_window_client_creation; //update opener master_object
+     //window.opener.master_object = {"Name":"Subho"};
+     window.opener.update_Lwm2mDevKit_objectDefinitions();// update Lwm2mDevKit.objectDefinitions
+  }
+}
+
+
+
+	function onLoad(){
+        master_object_window_client_creation = window.arguments[0]; //Because otherwise the object creation window receives the master object as null...
+        //master_object_window_client_creation = window.arguments[0]; //Normally not updated...only updated if objects added...
+
+	document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+        let listbox_available_objects = document.getElementById('listbox_available_objects');
+        let listbox_selected_objects = document.getElementById('listbox_selected_objects');
+    while(listbox_available_objects.hasChildNodes())
+         {listbox_available_objects.removeItemAt(0);}
+    while(listbox_selected_objects.hasChildNodes())
+         {listbox_selected_objects.removeItemAt(0);}
+
+    document.getElementById("checkbox_add_mandatory_objects").checked = false;
+/*    for( let i=0; i < Object.keys(window.arguments[0]).length; i++ )
+    {
+
+    let listitem = document.createElement('listitem');
+    var dataObj = window.arguments[0][i];    //i is item NOT counter...
+    str = dataObj.id;
+    listitem.setAttribute('label', str);
+    listitem.setAttribute('value', str);
+    listbox_available_objects.appendChild(listitem);
+
+    }
+*/
+
+    for (let i in window.arguments[0])
+    {
+     let listitem = document.createElement('listitem');
+     var dataObj = window.arguments[0][i];
+     str = dataObj.id;
+     listitem.setAttribute('label', str);
+     listitem.setAttribute('value', str);
+     listbox_available_objects.appendChild(listitem);
+    }
+
+        }
+
+
+function move(from, to)
+{
+  var f = document.getElementById(from);
+  var t = document.getElementById(to);
+
+   var sel = f.selectedItem;
+   f.removeChild(sel);
+   t.appendChild(sel);
+
+}
+
+
+
+function createClient()
+{
+
+/*
+  if(Lwm2mDevKit.client != null)
+  {saveClientConfig();
+  }
+*/
+
+
+
+// Shows warning if any mandatory item is not added...
+
+  var listbox_available_objects = document.getElementById("listbox_available_objects");
+  var itemCount = listbox_available_objects.itemCount;
+
+  if(document.getElementById("checkbox_add_mandatory_objects").checked)
+  for(let i = 0; i < itemCount; i++)
+  {
+    if( window.arguments[0][document.getElementById("listbox_available_objects").getItemAtIndex(i).value].mandatory  )
+    {alert("WARNING!!! Some mandatory objects have NOT been added to the client...");
+     break;
+    }
+  }
+
+
+
+  var listbox = document.getElementById("listbox_selected_objects");
+  itemCount = listbox.itemCount;
+  //alert(itemCount);
+  itemCount--;
+  //var str = "";
+  //alert(listbox.getItemAtIndex(0).label);
+  var json = {"objects":[], "instances":{}, "attributes":{}};
+  while(itemCount >= 0)
+  {
+    json.instances[listbox.getItemAtIndex(itemCount).label]={};
+    json.objects.push(Number(listbox.getItemAtIndex(itemCount).label));
+    itemCount--;
+  }
+  //alert(JSON.stringify(json));
+  json.objects.sort();
+  json.endpointClientName=document.getElementById("textbox_client_name").value;
+  json.root="/";
+
+  //alert("Client created");
+  //alert(JSON.stringify(json));
+
+
+//  Lwm2mDevKit.client = json;
+  var str = JSON.stringify(json);
+
+  var filename = document.getElementById("textbox_client_name").value;
+  window.opener.writeStringToFile('resource://clients',filename, str);
+
+//Lwm2mDevKit.clearTree();
+//setClientTree(json);
+
+
+
+}
+
+
+function addMandatoryObjects(e)
+{
+ var f = document.getElementById("listbox_available_objects");
+ var t = document.getElementById("listbox_selected_objects");
+
+//
+    if(!e.target.checked)
+    {
+      var array_del = [];
+      var itemCount = f.itemCount;
+      for (let i=0, j=0; i < itemCount; i++)
+      {
+
+        if( window.arguments[0][f.getItemAtIndex(j).value].mandatory )
+        {
+
+          var sel = f.getItemAtIndex(j);
+          f.removeChild(sel);
+          t.appendChild(sel);
+
+        }
+        else
+        {
+          j++;
+        }
+
+      }
+    }
+
+//
+}
+
+
+
+
+]]>
+</script>
+
+
+   <textbox id="tb"/>
+   <vbox>
+     <hbox>
+       <label id="label_client_name" value="Client Name:" control="textbox_client_name" />
+       <textbox id="textbox_client_name" value="Client name" />
+     </hbox>
+
+     <hbox>
+       <groupbox flex="1">
+         <caption label="Available Objects"/>
+
+         <listbox id="listbox_available_objects" value2="10">
+          <!-- <listitem label="Perl" /> -->
+         </listbox>
+       </groupbox>
+
+     <vbox>
+       <spacer flex="1" />
+       <button id="button_move_right" label="Select" oncommand="move('listbox_available_objects','listbox_selected_objects');" />
+       <button id="button_move_left" label="Remove" oncommand="move('listbox_selected_objects','listbox_available_objects');"/>
+     </vbox>
+
+       <groupbox>
+         <caption label="Client objects" />
+
+         <listbox id="listbox_selected_objects">
+
+         </listbox>
+       </groupbox>
+     </hbox>
+
+     <hbox>
+       <button id="button_new_object" label="New object" oncommand=" master_object_window_client_creation = window.arguments[0];
+		window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation );
+
+	document.getElementById('panel_create_client').hidePopup(); document.getElementById('panel_create_object').openPopup(document.getElementById('panel_create_client'), 'overlap', 0, 0);" />
+       <spacer flex="1" />
+       <checkbox id="checkbox_add_mandatory_objects" label="Add mandatory objects" checked="false" onclick="addMandatoryObjects(event);" />
+       <button id="button_create" label="Create" oncommand="createClient(); window.close();" />
+     </hbox>
+   </vbox>
+ 
+
+
+
+
+</window>

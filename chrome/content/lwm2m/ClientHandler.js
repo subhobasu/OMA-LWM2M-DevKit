@@ -275,11 +275,22 @@ Lwm2mDevKit.showObjectDefinition = function(obj) {
 		input.setAttribute('class', 'resvalue');
 		input.setAttribute('type', 'number');
 		input.setAttribute('id', 'object_instantiate_'+obj);
-		input.setAttribute('value', parseInt(Object.keys(Lwm2mDevKit.client.instances[obj]).pop())+1);
+
+                // Subho_start
+		//input.setAttribute('value', parseInt(Object.keys(Lwm2mDevKit.client.instances[obj]).pop())+1);
+
+                if (Object.keys(Lwm2mDevKit.client.instances[obj]).pop() == undefined)
+                {input.setAttribute('value', 0);
+                }
+                else
+                {input.setAttribute('value', parseInt(Object.keys(Lwm2mDevKit.client.instances[obj]).pop())+1);
+                }
+                // Subho_end
 		
 		cell.appendChild(input);
 	}
 	// button
+
 	if (multi ||
 		Lwm2mDevKit.client.instances[obj]===undefined || Lwm2mDevKit.client.instances[obj].length===0) {
 		
@@ -292,6 +303,7 @@ Lwm2mDevKit.showObjectDefinition = function(obj) {
 			});
 		cell.appendChild(input);
 	}
+
 };
 
 Lwm2mDevKit.showResourceDefinitions = function(obj) {
@@ -306,6 +318,10 @@ Lwm2mDevKit.showResourceDefinitions = function(obj) {
 	}
 
 	rows.setAttribute('rows', resourcedefs.length);
+
+        //Subho_start added the 'if' condition for non-existent resources...
+        if(Object.keys(resourcedefs).pop() != undefined)
+     {
 
 	for (let i in resourcedefs) {
 
@@ -352,7 +368,10 @@ Lwm2mDevKit.showResourceDefinitions = function(obj) {
 		let box = document.createElement('description');
 		box.setAttribute('flex', '1');
 		box.setAttribute('style', 'padding: 8px 0 9px 0; white-space: pre-wrap;');
-		box.textContent = Lwm2mDevKit.htmlEntities(resourcedefs[i].description);
+		//box.textContent = Lwm2mDevKit.htmlEntities(resourcedefs[i].description);
+
+                box.setAttribute('value', (resourcedefs[i].description)); //Subho_modify Changed the above line to this one...did not interpret Lwm2mDevKit.htmlEntities...see later
+       
 		cell.appendChild(box);
 		row.appendChild(cell);
 
@@ -360,6 +379,12 @@ Lwm2mDevKit.showResourceDefinitions = function(obj) {
 	}
 	
 	row.style.borderBottom = '';
+     }
+     else
+     {alert("Object contains no resource definition...");
+     }
+
+        //Subho_end
 };
 
 Lwm2mDevKit.showInstanceScreen = function(obj, ins) {
@@ -774,7 +799,8 @@ Lwm2mDevKit.createInstance = function(obj, ins, data) {
 	
 	// update tree
 	Lwm2mDevKit.clearTree();
-	Lwm2mDevKit.setTree();
+	//Lwm2mDevKit.setTree();
+        setClientTree(Lwm2mDevKit.client); //Subho_modified Changed the above line to this one, otherwise tree assumes consecutive object nos...
 	
 	Lwm2mDevKit.Tooltips.nextStep();
 	return true;
