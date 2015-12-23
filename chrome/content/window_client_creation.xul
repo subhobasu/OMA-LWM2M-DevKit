@@ -30,6 +30,8 @@ function setStatus(text) {
   gStatus.value = "Status: " + text + "...";
 }
 
+
+
 ]]></script>
 
  
@@ -43,11 +45,14 @@ function setStatus(text) {
 
 -->
 
+
+
 <window id = "window_client_creation"
         title = "Create client"
         xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload = "onLoad();"
         onunload = "update_master_object();" >
+
 
 <script>
 <![CDATA[
@@ -98,6 +103,8 @@ function update_master_object()
      str = dataObj.id + " (" + dataObj.name + ")";
      listitem.setAttribute('label', str);
      listitem.setAttribute('value', dataObj.id);
+     listitem.setAttribute('ondragstart', "event.dataTransfer.setData('text/plain',null)");
+     
      listbox_available_objects.appendChild(listitem);
     }
 
@@ -165,7 +172,7 @@ function createClient()
     itemCount--;
   }
   //alert(JSON.stringify(json));
-  json.objects.sort();
+  json.objects.sort(function(a,b){return a-b});
   json.endpointClientName=document.getElementById("textbox_client_name").value;
   json.root="/";
 
@@ -220,7 +227,70 @@ function addMandatoryObjects(e)
 }
 
 
+//-------------------------------------------------
 
+//------------------------------------------------------------------
+
+  var dragged;
+
+  /* events fired on the draggable target */
+  document.addEventListener("drag", function( event ) {
+
+}, false);
+
+  document.addEventListener("dragstart", function( event ) {
+      // store a ref. on the dragged elem
+      dragged = event.target;
+      // make it half transparent
+      event.target.style.opacity = .5;
+  }, false);
+
+  document.addEventListener("dragend", function( event ) {
+      // reset the transparency
+      event.target.style.opacity = "";
+  }, false);
+
+  /* events fired on the drop targets */
+  document.addEventListener("dragover", function( event ) {
+      // prevent default to allow drop
+      event.preventDefault();
+  }, false);
+
+ document.addEventListener("dragenter", function( event ) {
+      // highlight potential drop target when the draggable element enters it
+      
+      if ( event.target.className == "dropzone" ) {
+          event.target.style.background = "purple";
+      }
+      
+
+  }, false);
+
+  document.addEventListener("dragleave", function( event ) {
+      // reset background of potential drop target when the draggable element leaves it
+      
+      if ( event.target.className == "dropzone" ) {
+          event.target.style.background = "";
+      }
+      
+
+  }, false);
+
+document.addEventListener("drop", function( event ) {
+      // prevent default action (open as link for some elements)
+      event.preventDefault();
+      // move dragged elem to the selected drop target
+      if ( event.target.className == "dropzone"  ) {
+          event.target.style.background = "";
+          dragged.parentNode.removeChild( dragged );
+          event.target.appendChild( dragged );
+      }
+    
+  }, false);
+
+//------------------------------------------------------------------
+
+//-------------------------------------------------
 
 ]]>
 </script>
@@ -237,7 +307,7 @@ function addMandatoryObjects(e)
        <groupbox flex="1">
          <caption label="Available Objects"/>
 
-         <listbox id="listbox_available_objects" seltype="multiple" value2="10">
+         <listbox id="listbox_available_objects" seltype="multiple" value2="10" class="dropzone">
           <!-- <listitem label="Perl" /> -->
          </listbox>
        </groupbox>
@@ -251,7 +321,7 @@ function addMandatoryObjects(e)
        <groupbox>
          <caption label="Client objects" />
 
-         <listbox id="listbox_selected_objects">
+         <listbox id="listbox_selected_objects" class="dropzone" seltype="multiple">
 
          </listbox>
        </groupbox>
@@ -268,8 +338,22 @@ function addMandatoryObjects(e)
      </hbox>
    </vbox>
  
+<!--
+
+<style>
 
 
+  .dropzone {
+    width: 200px;
+    height: 20px;
+    background: blueviolet;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+
+</style>
+
+-->
 
 
 </window>

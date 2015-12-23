@@ -12,6 +12,8 @@
 
 var master_object_window_object_resource_creation = null;
 
+var addedResources = {};
+
 function update_master_object_window_object_creation()
 {
   if( master_object_window_object_resource_creation != null ) //has been updated in the resources in objects(added)...now always overwritten even if not updated...
@@ -97,7 +99,16 @@ function onLoad(){
 
   }
 
-
+function updateAddedResouces()
+{
+  var str_temp = "";
+  var value = document.getElementById('textbox_create_resource_id').value;
+  addedResources[value] = value;
+  for (let i in addedResources)
+  {str_temp += addedResources[i] + ",";
+  }
+  document.getElementById('label_added').value = str_temp;
+}
 
 
 
@@ -108,6 +119,7 @@ function onLoad(){
 
    <hbox>
      <label id="label_added_resources" value="Added resources:" />
+     <label id="label_added" disabled="true" />
    </hbox>
 
 
@@ -163,9 +175,9 @@ function onLoad(){
    </hbox>
 
    <hbox>
-     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject();" />
+     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject(); updateAddedResouces(); alert('Added resource');" />
      <spacer flex="1" />
-     <button id="button_finish" label="Finish" oncommand="close();" />
+     <button id="button_finish" label="Save" oncommand="close();" />
    </hbox>
 
 

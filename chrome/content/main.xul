@@ -1416,7 +1416,7 @@ function saveClientConfig()
                   <!--     <button id="button_save" class="special-button" label="Save client config" onclick="saveClientConfig();" />  -->
         <!--     <button id="button_test1" class="special-button" label="Dummy1" onclick="readStringFromUrl('resource://objects/');" /> -->
         <!--     <button id="button_test2" class="special-button" label="Dummy2" onclick="doXmlStuff();" />                             -->
-             <button id="button_test3" class="special-button" label="Dummy3" onclick="alert(JSON.stringify(Lwm2mDevKit.objectDefinitions));" />
+   <!--  <button id="button_test3" class="special-button" label="Dummy3" onclick="alert(JSON.stringify(Lwm2mDevKit.objectDefinitions));" /> -->
 				<button id="button_preferences" class="special-button" style="width: 3.3em; min-width: 3.3em;" oncommand="window.openDialog('chrome://lwm2m-devkit/content/options.xul', 'Prefs', 'chrome,titlebar,toolbar,centerscreen,modal'); Lwm2mDevKit.loadBehavior();"><label style="margin: -16px 0 -10px 0; font-size: 220%;" value="≡" /></button>
 			</hbox>
 			
