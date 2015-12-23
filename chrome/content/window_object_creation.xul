@@ -23,7 +23,7 @@ function update_master_object_window_client_creation()
 
 function onLoad(){
   master_object_window_object_creation = window.arguments[0]; //holds the master object from the client creation window...
-  document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+  //document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
 }
 
   function createObject()
@@ -69,10 +69,11 @@ function onLoad(){
 ]]>
 </script>
 
-
+<!--
    <hbox>
      <textbox id="tb" />
    </hbox>
+-->
 
    <hbox>
      <label id="label_create_object_id" value="Object Id:" />

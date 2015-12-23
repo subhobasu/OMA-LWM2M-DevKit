@@ -3,7 +3,7 @@
 
 <!--
 
-<window onload="onLoad();" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<window onload="onLoad();" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 <script><![CDATA[
 
 var gStatus, gProgressMeter;
@@ -69,7 +69,7 @@ function update_master_object()
         master_object_window_client_creation = window.arguments[0]; //Because otherwise the object creation window receives the master object as null...
         //master_object_window_client_creation = window.arguments[0]; //Normally not updated...only updated if objects added...
 
-	document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+	//document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
         let listbox_available_objects = document.getElementById('listbox_available_objects');
         let listbox_selected_objects = document.getElementById('listbox_selected_objects');
     while(listbox_available_objects.hasChildNodes())
@@ -95,9 +95,9 @@ function update_master_object()
     {
      let listitem = document.createElement('listitem');
      var dataObj = window.arguments[0][i];
-     str = dataObj.id;
+     str = dataObj.id + " (" + dataObj.name + ")";
      listitem.setAttribute('label', str);
-     listitem.setAttribute('value', str);
+     listitem.setAttribute('value', dataObj.id);
      listbox_available_objects.appendChild(listitem);
     }
 
@@ -109,9 +109,16 @@ function move(from, to)
   var f = document.getElementById(from);
   var t = document.getElementById(to);
 
-   var sel = f.selectedItem;
-   f.removeChild(sel);
-   t.appendChild(sel);
+   var sel = f.selectedItems;
+   //alert(sel.length);
+
+   for (let i=0; i < sel.length; i++)
+   {
+    t.appendChild(sel[i]);
+    //f.removeChild(sel[i]);
+    i--;
+   }
+
 
 }
 
@@ -153,8 +160,8 @@ function createClient()
   var json = {"objects":[], "instances":{}, "attributes":{}};
   while(itemCount >= 0)
   {
-    json.instances[listbox.getItemAtIndex(itemCount).label]={};
-    json.objects.push(Number(listbox.getItemAtIndex(itemCount).label));
+    json.instances[listbox.getItemAtIndex(itemCount).value]={};
+    json.objects.push(Number(listbox.getItemAtIndex(itemCount).value));
     itemCount--;
   }
   //alert(JSON.stringify(json));
@@ -219,7 +226,7 @@ function addMandatoryObjects(e)
 </script>
 
 
-   <textbox id="tb"/>
+   <!-- <textbox id="tb"/> -->
    <vbox>
      <hbox>
        <label id="label_client_name" value="Client Name:" control="textbox_client_name" />
@@ -230,15 +237,15 @@ function addMandatoryObjects(e)
        <groupbox flex="1">
          <caption label="Available Objects"/>
 
-         <listbox id="listbox_available_objects" value2="10">
+         <listbox id="listbox_available_objects" seltype="multiple" value2="10">
           <!-- <listitem label="Perl" /> -->
          </listbox>
        </groupbox>
 
      <vbox>
        <spacer flex="1" />
-       <button id="button_move_right" label="Select" oncommand="move('listbox_available_objects','listbox_selected_objects');" />
-       <button id="button_move_left" label="Remove" oncommand="move('listbox_selected_objects','listbox_available_objects');"/>
+       <button id="button_move_right" label=">>>" oncommand="move('listbox_available_objects','listbox_selected_objects');" />
+       <button id="button_move_left" label="&lt;&lt;&lt;" oncommand="move('listbox_selected_objects','listbox_available_objects');"/>
      </vbox>
 
        <groupbox>

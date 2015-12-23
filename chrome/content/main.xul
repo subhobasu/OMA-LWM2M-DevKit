@@ -113,6 +113,16 @@
 <![CDATA[ //Cdata for less than operator
 
 var master_object = {};
+var slash;
+
+var platform = (/Linux.*/.test(window.navigator.platform))?"Linux":"Windows";
+if(platform=="Linux")
+{slash="/";
+}
+else if(platform=="Windows")
+{slash="\\";
+}
+
 /*--------------------
 var str_temp = readStringFromFile('resource://objects',"master_object_file");
 if(str_temp == "" || str_temp == undefined)
@@ -146,7 +156,7 @@ while(entries.hasMoreElements()) {
 var temp_array = [];
 for (let i in array)
 {
- temp_array.push( array[i].path.split("/").pop().split('.')[0] );
+ temp_array.push( array[i].path.split(slash).pop().split('.')[0] );
 }
 
  temp_array.sort();
@@ -228,7 +238,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
 // file is nsIFile, data is a string
 
 
-var file = new FileUtils.File(  path + "/" + filename + ".json");
+var file = new FileUtils.File(  path + slash + filename + ".json");
 //var file = new FileUtils.File("/home/subho/Subho/Work/OMA/OMA-LWM2M-DevKit/objects/" + filename + ".json");
 var data = "";
 data = str;
@@ -261,7 +271,7 @@ NetUtil.asyncCopy(istream, ostream, function(status) {
 
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
 
-var file = new FileUtils.File( path + "/" + filename + ".json");
+var file = new FileUtils.File( path + slash + filename + ".json");
 //var file = new FileUtils.File("/home/subho/Subho/Work/OMA/OMA-LWM2M-DevKit/objects/" + filename + ".json");
 //var file = new FileUtils.File("chrome://lwm2m-devkit/../objects/" + filename + ".json");
 if(!file.exists())
