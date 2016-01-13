@@ -2,7 +2,9 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
 <window id = "window_object_creation"
-        title = "Create object"
+        title = "Create Object"
+	height = "300"
+	width = "400"
         xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload = "onLoad();"
         onunload = "update_master_object_window_client_creation();" >
@@ -23,6 +25,7 @@ function update_master_object_window_client_creation()
 
 function onLoad(){
   master_object_window_object_creation = window.arguments[0]; //holds the master object from the client creation window...
+  document.getElementById('textbox_objects_folder').value = window.arguments[1];
   //document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
 }
 
@@ -61,10 +64,23 @@ function onLoad(){
 
     var temp = JSON.stringify(json);
     //alert(temp);
-    window.opener.opener.writeStringToFile('resource://objects',json.id, temp); //writes the object to disk
+    //window.opener.opener.writeStringToFile('resource://objects',json.id, temp); //writes the object to disk
+    window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, json.id, temp); //writes the object to disk
     //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
     //Lwm2mDevKit.objectDefinitions = master_object;
   }
+
+function refresh()
+{
+  document.getElementById('textbox_create_object_id').value="";
+  document.getElementById('textbox_create_object_id').placeholder="Eg. 10";
+
+  document.getElementById('textbox_create_object_name').value="";
+  document.getElementById('textbox_create_object_name').placeholder="Eg. LWM2M Security";
+
+  document.getElementById('textbox_create_object_description').value="";
+  document.getElementById('textbox_create_object_description').placeholder="Object description goes here...";
+}
 
 ]]>
 </script>
@@ -77,12 +93,12 @@ function onLoad(){
 
    <hbox>
      <label id="label_create_object_id" value="Object Id:" />
-     <textbox id="textbox_create_object_id" value="Eg. 0" />
+     <textbox id="textbox_create_object_id" placeholder="Eg. 10" />
    </hbox>
 
    <hbox>
      <label id="label_create_object_name" value="Object name:" />
-     <textbox id="textbox_create_object_name" value="Eg. LWM2M Security" />
+     <textbox id="textbox_create_object_name" placeholder="Eg. LWM2M Security" />
    </hbox>
 
    <hbox>
@@ -100,15 +116,20 @@ function onLoad(){
 
    <hbox>
      <label id="label_create_object_description" value="Description:" />
-     <textbox id="textbox_create_object_description" multiline="true" value="Eg. This LWM2M Object provides the keying material of a LWM2M Client..." />
+     <textbox id="textbox_create_object_description" multiline="true" placeholder="Object description goes here..." />
    </hbox>
+
+     <hbox>
+        <label value="Save object in folder:"/>
+        <textbox id="textbox_objects_folder" />
+     </hbox>
 
    <hbox>
-     <button id="button_create_object" label="Create object" oncommand="createObject(); window.opener.onLoad(); 
+     <button id="button_create_object" label="Create object" oncommand="createObject(); window.opener.onLoad();
+        window.opener.opener.update_objects_folder_and_copy(document.getElementById('textbox_objects_folder').value);
 	window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation, 
-	document.getElementById('textbox_create_object_id').value ); " />
+	document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value ); " />
    </hbox>
-
 
 
 

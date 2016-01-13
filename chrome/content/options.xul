@@ -47,6 +47,9 @@
 			<preference id="send-uri-host" name="extensions.lwm2m-devkit.behavior.send-uri-host" type="bool"/>
 			<preference id="send-size1" name="extensions.lwm2m-devkit.behavior.send-size1" type="bool"/>
 			<preference id="block-size" name="extensions.lwm2m-devkit.behavior.block-size" type="int"/>
+			
+			<preference id="clients_folder" name="extensions.lwm2m-devkit.behavior.clients_folder" type="string"/>
+			<preference id="objects_folder" name="extensions.lwm2m-devkit.behavior.objects_folder" type="string"/>
 		</preferences>
 		
 		<groupbox>
@@ -92,6 +95,27 @@
 				</rows>
 			</grid>
 		</groupbox>
+
+		<groupbox>
+			<caption label="Save folder"/>
+			<grid>
+				<columns>
+					<column flex="1"/>
+					<column flex="3"/>
+				</columns>
+				<rows>
+					<row>
+						<label value="Clients folder:"/>
+						<textbox preference="clients_folder" />
+					</row>
+					<row>
+						<label value="Objects folder:"/>
+						<textbox preference="objects_folder" />
+					</row>
+				</rows>
+			</grid>
+		</groupbox>
+
 		<groupbox>
 			<caption label="CoAP Behavior"/>
 			<grid>

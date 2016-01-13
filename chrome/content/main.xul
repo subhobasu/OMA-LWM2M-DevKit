@@ -67,7 +67,8 @@
 	
 	<keyset>
 		<key key="h" oncommand="Lwm2mDevKit.Tooltips.help();" />
-		<key key="e" oncommand="Lwm2mDevKit.loadExampleClient();" />
+	<!--	<key key="e" oncommand="Lwm2mDevKit.loadExampleClient();" /> -->
+		<key key="e" oncommand="loadExample();" />
 		<key key="c" oncommand="Lwm2mDevKit.enableCreateRows();" />
 		<key key="r" oncommand="Lwm2mDevKit.Registration.register();" />
 		<key key="u" oncommand="Lwm2mDevKit.Registration.update();" />
@@ -112,6 +113,11 @@
 <script type="application/x-javascript" charset="utf-8">
 <![CDATA[ //Cdata for less than operator
 
+Lwm2mDevKit.behavior.clients_folder = readStringFromUrl('resource://clients');
+Lwm2mDevKit.behavior.objects_folder = readStringFromUrl('resource://objects');
+Lwm2mDevKit.saveBehavior();
+Lwm2mDevKit.loadBehavior();
+
 var master_object = {};
 var slash;
 
@@ -140,10 +146,11 @@ else
 
 //creation of master_object-----------------------
 
-
+//Lwm2mDevKit.loadBehavior();
 
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
-var file1 = new FileUtils.File( readStringFromUrl('resource://objects') );
+//var file1 = new FileUtils.File( readStringFromUrl('resource://objects') );
+var file1 = new FileUtils.File( Lwm2mDevKit.behavior.objects_folder );
 
 var entries = file1.directoryEntries;
 var array = [];
@@ -169,7 +176,8 @@ for(let i=0; i < array.length ; i++)
  {continue;
  }
 
- var json = JSON.parse(readStringFromFile('resource://objects', array[i]));
+ //var json = JSON.parse(readStringFromFile(readStringFromUrl('resource://objects'), array[i]));
+ var json = JSON.parse(readStringFromFile(Lwm2mDevKit.behavior.objects_folder, array[i]));
  master_object[array[i]] = json;
 }
 
@@ -179,7 +187,8 @@ for(let i=0; i < array.length ; i++)
 
 
 Lwm2mDevKit.objectDefinitions = master_object;
-writeStringToFile('resource://objects', "master_object_file", JSON.stringify(master_object));
+//writeStringToFile('resource://objects', "master_object_file", JSON.stringify(master_object));
+writeStringToFile(Lwm2mDevKit.behavior.objects_folder, "master_object_file", JSON.stringify(master_object));
 
 
 function update_Lwm2mDevKit_objectDefinitions()
@@ -228,9 +237,10 @@ function update_Lwm2mDevKit_objectDefinitions()
     Lwm2mDevKit.objectDefinitions = master_object;
   }
 
-  function writeStringToFile(url,filename, str) //filename, str
+  function writeStringToFile(url,filename, str) //path, filename, str
   {
-    var path = readStringFromUrl(url);
+    //var path = readStringFromUrl(url);
+    var path = url;
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
@@ -267,7 +277,8 @@ NetUtil.asyncCopy(istream, ostream, function(status) {
 
   function readStringFromFile(url,filename) //returns the file contents as a string
   {
-   var path = readStringFromUrl(url);
+   //var path = readStringFromUrl(url);
+   var path = url;
 
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
 
@@ -412,7 +423,7 @@ chromeToPath("chrome://lwm2m-devkit/content/1.json");
   function createResourceInObject()
   {
     var filename = document.getElementById("textbox_create_object_id").value;
-    var str = readStringFromFile('resource://objects',filename);
+    var str = readStringFromFile(readStringFromUrl('resource://objects'),filename);
     var json = JSON.parse(str);
 
     var new_json_obj = {};
@@ -688,7 +699,8 @@ function setClientTree(json) { //parameter json is the client object
                 //alert(i);
 
                 //let clientObjectDefinitions = definitions[i];
-                let clientObjectDefinitions = JSON.parse(readStringFromFile('resource://objects',objects[i]));
+                //let clientObjectDefinitions = JSON.parse(readStringFromFile(readStringFromUrl('resource://objects'),objects[i]));
+                let clientObjectDefinitions = JSON.parse(readStringFromFile( Lwm2mDevKit.behavior.objects_folder ,objects[i]));
                 let instance = json.instances[objects[i]];
 
                 let treeItem = document.createElement("treeitem");
@@ -735,6 +747,19 @@ function setClientTree(json) { //parameter json is the client object
         treeChildren.appendChild(rootItem);
 }
 
+function loadExample()
+{
+  if(Lwm2mDevKit.client != null)
+  {saveClientConfig();
+  }
+
+  var str_selected_client = "example-client";
+  Lwm2mDevKit.client = JSON.parse(readStringFromFile(Lwm2mDevKit.behavior.clients_folder,str_selected_client));
+  Lwm2mDevKit.clearTree();
+  setClientTree(Lwm2mDevKit.client);
+  
+}
+
 function loadSelectedClient()
 {
 
@@ -743,9 +768,44 @@ function loadSelectedClient()
   }
 
   var str_selected_client = document.getElementById("listbox_list_of_saved_clients").selectedItem.value;
-  Lwm2mDevKit.client = JSON.parse(readStringFromFile('resource://clients',str_selected_client));
+  //Lwm2mDevKit.client = JSON.parse(readStringFromFile(readStringFromUrl('resource://clients'),str_selected_client));
+  Lwm2mDevKit.client = JSON.parse(readStringFromFile(Lwm2mDevKit.behavior.clients_folder,str_selected_client));
   Lwm2mDevKit.clearTree();
   setClientTree(Lwm2mDevKit.client);
+
+}
+
+function update_clients_folder_and_copy(clients_folder)
+{
+  Lwm2mDevKit.behavior.clients_folder = clients_folder;
+  Lwm2mDevKit.saveBehavior();
+
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+var file = new FileUtils.File( Lwm2mDevKit.behavior.clients_folder + slash + "example-client" + ".json");
+if(!file.exists())
+{
+  writeStringToFile(Lwm2mDevKit.behavior.clients_folder, "example-client", readStringFromFile(readStringFromUrl('resource://clients'), "example-client") );
+}
+
+}
+
+
+function update_objects_folder_and_copy(objects_folder)
+{
+  Lwm2mDevKit.behavior.objects_folder = objects_folder;
+  Lwm2mDevKit.saveBehavior();
+
+
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+for(let i = 0; i <= 9; i++)
+{
+var file = new FileUtils.File( Lwm2mDevKit.behavior.objects_folder + slash + i + ".json");
+if(!file.exists())
+{
+  writeStringToFile(Lwm2mDevKit.behavior.objects_folder, i, readStringFromFile(readStringFromUrl('resource://objects'), i) );
+}
+}
+
 
 }
 
@@ -825,7 +885,7 @@ function loadSelectedClient()
 		<vbox>
 			<button id="example_client" class="special-button" label="Example Client"
 				accesskey="E"
-				oncommand="Lwm2mDevKit.loadExampleClient(); document.getElementById('panel_device_loading').hidePopup();
+				oncommand="loadExample(); document.getElementById('panel_device_loading').hidePopup();
 
         document.getElementById('box_startup').hidden = false;
         document.getElementById('box_object_instance').hidden = true;
@@ -845,7 +905,7 @@ function loadSelectedClient()
 
 			<button id="load_from_file" class="special-button" label="New Client"
 				accesskey="N"
-                                oncommand="window.openDialog('chrome://lwm2m-devkit/content/window_client_creation.xul', 'window_client_creation', 'chrome,centerscreen,modal', master_object ); " />
+                                oncommand="window.openDialog('chrome://lwm2m-devkit/content/window_client_creation.xul', 'window_client_creation', 'chrome,centerscreen,modal', master_object, Lwm2mDevKit.behavior.clients_folder, Lwm2mDevKit.behavior.objects_folder ); " />
 
 		<!--		oncommand="test(); document.getElementById('panel_device_loading').hidePopup(); document.getElementById('panel_create_client').openPopup();" />  
                   -->
@@ -1147,7 +1207,7 @@ function populate()
   {parent.removeItemAt(0);}
 
 /*
-  var json_temp = JSON.parse(readStringFromFile('resource://clients',"list_of_saved_clients"));
+  var json_temp = JSON.parse(readStringFromFile(readStringFromUrl('resource://clients'),"list_of_saved_clients"));
   for (let i in json_temp.clients)
   {
 
@@ -1159,7 +1219,8 @@ function populate()
 */
 
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
-var file1 = new FileUtils.File( readStringFromUrl('resource://clients') );
+//var file1 = new FileUtils.File( readStringFromUrl('resource://clients') );
+var file1 = new FileUtils.File( Lwm2mDevKit.behavior.clients_folder );
 
 var entries = file1.directoryEntries;
 var array = [];
@@ -1172,7 +1233,7 @@ while(entries.hasMoreElements()) {
 var temp_array = [];
 for (let i in array)
 {
- temp_array.push( array[i].path.split("/").pop().split('.')[0] );
+ temp_array.push( array[i].path.split(slash).pop().split('.')[0] );
 }
 
  temp_array.sort();
@@ -1241,7 +1302,7 @@ while(entries.hasMoreElements()) {
 var temp_array = [];
 for (let i in array)
 {
- temp_array.push( array[i].path.split("/").pop().split('.')[0] );
+ temp_array.push( array[i].path.split(slash).pop().split('.')[0] );
 }
 
  temp_array.sort();
@@ -1344,7 +1405,8 @@ function addMandatoryObjects(e)
 function saveClientConfig()
 {
   var filename = Lwm2mDevKit.client.endpointClientName;
-  writeStringToFile('resource://clients',filename, JSON.stringify(Lwm2mDevKit.client));
+  //writeStringToFile('resource://clients',filename, JSON.stringify(Lwm2mDevKit.client));
+  writeStringToFile(Lwm2mDevKit.behavior.clients_folder, filename, JSON.stringify(Lwm2mDevKit.client));
 
 /*
   //entry in list_of_saved_clients
@@ -1415,6 +1477,8 @@ function saveClientConfig()
 				<separator flex="1" />
                   <!--     <button id="button_save" class="special-button" label="Save client config" onclick="saveClientConfig();" />  -->
         <!--     <button id="button_test1" class="special-button" label="Dummy1" onclick="readStringFromUrl('resource://objects/');" /> -->
+        <!--  <button id="button_clients" class="special-button" label="Clients" onclick="alert(Lwm2mDevKit.behavior.clients_folder);" /> -->
+        <!--  <button id="button_objects" class="special-button" label="Objects" onclick="alert(Lwm2mDevKit.behavior.objects_folder);" /> -->
         <!--     <button id="button_test2" class="special-button" label="Dummy2" onclick="doXmlStuff();" />                             -->
    <!--  <button id="button_test3" class="special-button" label="Dummy3" onclick="alert(JSON.stringify(Lwm2mDevKit.objectDefinitions));" /> -->
 				<button id="button_preferences" class="special-button" style="width: 3.3em; min-width: 3.3em;" oncommand="window.openDialog('chrome://lwm2m-devkit/content/options.xul', 'Prefs', 'chrome,titlebar,toolbar,centerscreen,modal'); Lwm2mDevKit.loadBehavior();"><label style="margin: -16px 0 -10px 0; font-size: 220%;" value="≡" /></button>

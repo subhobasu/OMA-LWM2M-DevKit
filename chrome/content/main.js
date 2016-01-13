@@ -55,7 +55,9 @@ Lwm2mDevKit.behavior = {
 	sendUriHost: false,
 	sendSize1: false,
 	blockSize: 0,
-	observeCancellation: 'lazy'
+	observeCancellation: 'lazy',
+	clients_folder: '',
+	objects_folder: ''
 };
 
 // LWM2M state

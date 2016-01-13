@@ -538,7 +538,7 @@ Lwm2mDevKit.addResourceRow = function(name, value, attributes, obj, ins, res, id
 	input.setAttribute('value', value);
 	input.addEventListener('focus', function () { this.style.borderColor='rgb(221, 66, 120)'; this.style.boxShadow='0 0 8px rgba(187, 60, 66, 1)'; });
 	input.addEventListener('blur', function () { this.style.borderColor=''; this.style.backgroundColor='';this.style.boxShadow=''; });
-	input.addEventListener('change', function () { Lwm2mDevKit.changeResource(this, obj, ins, res, id); });
+	input.addEventListener('change', function () { Lwm2mDevKit.changeResource(this, obj, ins, res, id); saveClientConfig(); });
 	cell.appendChild(input);
 	row.appendChild(cell);
 

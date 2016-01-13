@@ -62,6 +62,11 @@ Lwm2mDevKit.loadBehavior = function() {
 
 	Lwm2mDevKit.createRows = Lwm2mDevKit.prefManager
 			.getBoolPref('extensions.lwm2m-devkit.show-create-rows');
+
+	Lwm2mDevKit.behavior.clients_folder = Lwm2mDevKit.prefManager
+			.getCharPref('extensions.lwm2m-devkit.behavior.clients_folder');
+	Lwm2mDevKit.behavior.objects_folder = Lwm2mDevKit.prefManager
+			.getCharPref('extensions.lwm2m-devkit.behavior.objects_folder');
 	
 };
 
@@ -85,6 +90,13 @@ Lwm2mDevKit.saveBehavior = function() {
 	Lwm2mDevKit.prefManager.setCharPref(
 			'extensions.lwm2m-devkit.behavior.observe-cancellation',
 			Lwm2mDevKit.behavior.observeCancellation);
+
+	Lwm2mDevKit.prefManager.setCharPref(
+			'extensions.lwm2m-devkit.behavior.clients_folder',
+			Lwm2mDevKit.behavior.clients_folder);
+	Lwm2mDevKit.prefManager.setCharPref(
+			'extensions.lwm2m-devkit.behavior.objects_folder',
+			Lwm2mDevKit.behavior.objects_folder);
 };
 
 Lwm2mDevKit.htmlParser = function(aHTMLString) {

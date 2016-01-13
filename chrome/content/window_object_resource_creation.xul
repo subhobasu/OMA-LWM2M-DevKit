@@ -33,7 +33,8 @@ function onLoad(){
   function createResourceInObject()
   {
     var filename = window.arguments[1];
-    var str = window.opener.opener.opener.readStringFromFile('resource://objects',filename);
+    //var str = window.opener.opener.opener.readStringFromFile('resource://objects',filename);
+    var str = window.opener.opener.opener.readStringFromFile(window.arguments[2], filename);
     var json = JSON.parse(str);
     //alert(JSON.stringify(json));
 
@@ -82,7 +83,8 @@ function onLoad(){
     //Lwm2mDevKit.objectDefinitions = master_object;
     var temp = JSON.stringify(json);
     //alert(temp);
-    window.opener.opener.opener.writeStringToFile('resource://objects',json.id, temp);
+    //window.opener.opener.opener.writeStringToFile('resource://objects',json.id, temp);
+    window.opener.opener.opener.writeStringToFile(window.arguments[2], json.id, temp);
 
     //json.resourcedefs[document.getElementById(textbox_create_resource_id).value]=new_json_obj;
 
@@ -94,7 +96,6 @@ function onLoad(){
     //var temp = JSON.stringify(json);
     //alert(temp);
     //writeStringToFile('resource://objects',json.id, temp);
-
 
 
   }
@@ -110,7 +111,29 @@ function updateAddedResouces()
   document.getElementById('label_added').value = str_temp;
 }
 
+function refresh()
+{
+  document.getElementById('textbox_create_resource_id').value="";
+  document.getElementById('textbox_create_resource_id').placeholder="Eg. 0";
+  
+  document.getElementById('textbox_create_resource_name').value="";
+  document.getElementById('textbox_create_resource_name').placeholder="Eg. LWM2M Server URI";
 
+  document.getElementById('textbox_create_resource_operations').value="";
+  document.getElementById('textbox_create_resource_operations').placeholder="-";
+
+  document.getElementById('textbox_create_resource_type').value="";
+  document.getElementById('textbox_create_resource_type').placeholder="string";
+
+  document.getElementById('textbox_create_resource_range').value="";
+  document.getElementById('textbox_create_resource_range').placeholder="0-255 bytes";
+
+  document.getElementById('textbox_create_resource_units').value="";
+  document.getElementById('textbox_create_resource_units').placeholder="1";
+
+  document.getElementById('textbox_create_resource_description').value="";
+  document.getElementById('textbox_create_resource_description').placeholder="Resource description goes here";
+}
 
 
 ]]>
@@ -129,17 +152,17 @@ function updateAddedResouces()
 
    <hbox>
      <label id="label_create_resource_id" value="Resource Id:" />
-     <textbox id="textbox_create_resource_id" value="0" />
+     <textbox id="textbox_create_resource_id" placeholder="Eg. 0" />
    </hbox>
 
    <hbox>
      <label id="label_create_resource_name" value="Resource name:" />
-     <textbox id="textbox_create_resource_name" value="Eg. LWM2M Server URI" />
+     <textbox id="textbox_create_resource_name" placeholder="Eg. LWM2M Server URI" />
    </hbox>
 
    <hbox>
      <label id="label_create_resource_operations" value="Resource operations:" />
-     <textbox id="textbox_create_resource_operations" value="-" />
+     <textbox id="textbox_create_resource_operations" placeholder="-" />
    </hbox>
 
    <hbox>
@@ -156,28 +179,28 @@ function updateAddedResouces()
 
    <hbox>
      <label id="label_create_resource_type" value="Resource type:" />
-     <textbox id="textbox_create_resource_type" value="string" />
+     <textbox id="textbox_create_resource_type" placeholder="string" />
    </hbox>
 
    <hbox>
      <label id="label_create_resource_range" value="Resource range:" />
-     <textbox id="textbox_create_resource_range" value="0-255 bytes" />
+     <textbox id="textbox_create_resource_range" placeholder="0-255 bytes" />
    </hbox>
 
    <hbox>
      <label id="label_create_resource_units" value="Resource units:" />
-     <textbox id="textbox_create_resource_units" value="" />
+     <textbox id="textbox_create_resource_units" placeholder="1" />
    </hbox>
 
    <hbox>
      <label id="label_create_resource_description" value="Resource description:" />
-     <textbox id="textbox_create_resource_description" value="Uniquely identifies the LWM2M Server..." />
+     <textbox id="textbox_create_resource_description" placeholder="Resource description goes here" />
    </hbox>
 
    <hbox>
-     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject(); updateAddedResouces(); alert('Added resource');" />
+     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject(); updateAddedResouces(); alert('Added resource'); refresh();" />
      <spacer flex="1" />
-     <button id="button_finish" label="Save" oncommand="close();" />
+     <button id="button_finish" label="Save" oncommand="window.opener.refresh(); close();" />
    </hbox>
 
 

@@ -48,7 +48,7 @@ function setStatus(text) {
 
 
 <window id = "window_client_creation"
-        title = "Create client"
+        title = "Create Client"
         xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload = "onLoad();"
         onunload = "update_master_object();" >
@@ -107,6 +107,8 @@ function update_master_object()
      
      listbox_available_objects.appendChild(listitem);
     }
+
+     document.getElementById('textbox_clients_folder').value = window.arguments[1];
 
         }
 
@@ -184,7 +186,8 @@ function createClient()
   var str = JSON.stringify(json);
 
   var filename = document.getElementById("textbox_client_name").value;
-  window.opener.writeStringToFile('resource://clients',filename, str);
+  //window.opener.writeStringToFile('resource://clients',filename, str);
+  window.opener.writeStringToFile(document.getElementById('textbox_clients_folder').value, filename, str);
 
 //Lwm2mDevKit.clearTree();
 //setClientTree(json);
@@ -329,12 +332,16 @@ document.addEventListener("drop", function( event ) {
 
      <hbox>
        <button id="button_new_object" label="New object" oncommand=" master_object_window_client_creation = window.arguments[0];
-		window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation );
+		window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2] );
 
 	document.getElementById('panel_create_client').hidePopup(); document.getElementById('panel_create_object').openPopup(document.getElementById('panel_create_client'), 'overlap', 0, 0);" />
        <spacer flex="1" />
        <checkbox id="checkbox_add_mandatory_objects" label="Add mandatory objects" checked="false" onclick="addMandatoryObjects(event);" />
-       <button id="button_create" label="Create" oncommand="createClient(); window.close();" />
+       <button id="button_create" label="Create" oncommand="createClient(); window.opener.update_clients_folder_and_copy(document.getElementById('textbox_clients_folder').value); window.close();" />
+     </hbox>
+     <hbox>
+        <label value="Save client in folder:"/>
+	<textbox id="textbox_clients_folder" />
      </hbox>
    </vbox>
  
