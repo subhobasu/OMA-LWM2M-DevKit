@@ -35,6 +35,8 @@
 <prefwindow id="lwm2m-devkit-options-window"
      title="OMA LWM2M DevKit Preferences"
      xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<script type="application/x-javascript" charset="utf-8" src="chrome://lwm2m-devkit/content/filePicker.js" />
      
 	<prefpane label="OMA LWM2M DevKit Preferences">
 		<preferences>
@@ -106,11 +108,17 @@
 				<rows>
 					<row>
 						<label value="Clients folder:"/>
-						<textbox preference="clients_folder" />
+						<textbox id="textbox_clients_folder" preference="clients_folder" />
+						<button label="Edit" oncommand=" var path = filePicker(); 
+						document.getElementById('textbox_clients_folder').value=path;
+						window.opener.update_clients_folder_and_copy(path); " />
 					</row>
 					<row>
 						<label value="Objects folder:"/>
-						<textbox preference="objects_folder" />
+						<textbox id="textbox_objects_folder" preference="objects_folder" />
+						<button label="Edit" oncommand=" var path = filePicker();
+                                                document.getElementById('textbox_objects_folder').value=path;
+                                                window.opener.update_objects_folder_and_copy(path); " />
 					</row>
 				</rows>
 			</grid>

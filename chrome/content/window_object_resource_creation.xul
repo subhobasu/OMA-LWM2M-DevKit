@@ -2,13 +2,15 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
 <window id = "window_object_resource_creation"
-        title = "Create resource in object"
+        title = "Resource"
         xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload = "onLoad();"
         onunload = "update_master_object_window_object_creation();" >
 
 <script>
 <![CDATA[
+
+//var testdata;
 
 var master_object_window_object_resource_creation = null;
 
@@ -24,18 +26,72 @@ function update_master_object_window_object_creation()
 
 
 function onLoad(){
+
+  //testdata=1;
   master_object_window_object_resource_creation = window.arguments[0]; //holds the master object from the object creation window...
-  document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+  //document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+
+  //alert("test");  alert NOT WORKING...
+  //alert(window.arguments[4]);
+  //alert(window.arguments[3]);
+
+  if(window.arguments[3] == 'e')
+  {
+   //alert(window.arguments[4]);
+   document.getElementById('menulist_edit_resource').setAttribute('hidden', "false");
+   for(var count=0; count < window.arguments[4].itemCount; count++)
+   {
+    menuitem = document.createElement('menuitem');
+    menuitem.setAttribute('label', window.arguments[4].getItemAtIndex(count).label);
+    menuitem.setAttribute('value', window.arguments[4].getItemAtIndex(count).value);
+    document.getElementById('menupopup_edit_resource').appendChild(menuitem);
+   }
+
+   document.getElementById('button_add_resource').setAttribute('label', "Save");
+   document.getElementById('textbox_create_resource_id').setAttribute('disabled', true);
+  }
+
+   document.getElementById('menulist_type').addEventListener("command", updatePlaceholder, false);
 }
 
+function updatePlaceholder()
+{
+  var v1 = document.getElementById('menulist_type').selectedItem.value;
+  switch(v1)
+  { case "string" : document.getElementById('textbox_create_resource_range').setAttribute('placeholder', "0-255");
+		    document.getElementById('textbox_create_resource_units').setAttribute('placeholder', "bytes");
+                    break;
 
+    case "boolean" : document.getElementById('textbox_create_resource_range').setAttribute('placeholder', "true/false");
+                    document.getElementById('textbox_create_resource_units').setAttribute('placeholder', "");
+                    break;
+
+    case "integer" : document.getElementById('textbox_create_resource_range').setAttribute('placeholder', "0-16");
+                    document.getElementById('textbox_create_resource_units').setAttribute('placeholder', "bits");
+                    break;
+
+
+    case "opaque" : document.getElementById('textbox_create_resource_range').setAttribute('placeholder', "0-100");
+                    document.getElementById('textbox_create_resource_units').setAttribute('placeholder', "%");
+                    break;
+
+    case "time" : document.getElementById('textbox_create_resource_range').setAttribute('placeholder', "0-60");
+                    document.getElementById('textbox_create_resource_units').setAttribute('placeholder', "secs");
+                    break;
+
+    case "objlnk" : document.getElementById('textbox_create_resource_range').setAttribute('placeholder', "string");
+                    document.getElementById('textbox_create_resource_units').setAttribute('placeholder', "");
+                    break;
+  }
+}
 
   function createResourceInObject()
   {
     var filename = window.arguments[1];
     //var str = window.opener.opener.opener.readStringFromFile('resource://objects',filename);
-    var str = window.opener.opener.opener.readStringFromFile(window.arguments[2], filename);
-    var json = JSON.parse(str);
+    //var str = window.opener.opener.opener.readStringFromFile(window.arguments[2], filename);
+    //var json = JSON.parse(str);
+    var json = master_object_window_object_resource_creation[filename];
     //alert(JSON.stringify(json));
 
 
@@ -50,7 +106,16 @@ function onLoad(){
     new_json_obj[item]=value;
 
     item = "operations";
-    value = document.getElementById("textbox_create_resource_operations").value;
+    value = "";
+    if(document.getElementById('checkbox_read').checked)
+    {value+="R";}
+    if(document.getElementById('checkbox_write').checked)
+    {value+="W";}
+    if(document.getElementById('checkbox_execute').checked)
+    {value+="E";}
+    if(value=="")
+    {value="-";}
+    //value = document.getElementById("textbox_create_resource_operations").value;
     new_json_obj[item]=value;
 
     item = "instancetype";
@@ -62,7 +127,8 @@ function onLoad(){
     new_json_obj[item]=value;
 
     item = "type";
-    value = (document.getElementById("textbox_create_resource_type").value);
+    //value = (document.getElementById("textbox_create_resource_type").value);
+    value = document.getElementById('menulist_type').selectedItem.value;
     new_json_obj[item]=value;
 
     item = "range";
@@ -79,12 +145,18 @@ function onLoad(){
 
     json.resourcedefs[document.getElementById("textbox_create_resource_id").value]=new_json_obj;
     master_object_window_object_resource_creation[filename].resourcedefs[new_json_obj.id] = new_json_obj;
+    window.opener.master_object_window_object_creation = master_object_window_object_resource_creation;
+    //window.opener.opener.master_object_window_client_creation = master_object_window_object_resource_creation;
+    //window.opener.opener.opener.master_object = master_object_window_object_resource_creation;
+
+    //window.opener.opener.opener.writeStringToFile( window.arguments[2], "master_object_file", JSON.stringify(master_object_window_object_resource_creation) ); //writes the master object to disk
+
     //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
     //Lwm2mDevKit.objectDefinitions = master_object;
     var temp = JSON.stringify(json);
     //alert(temp);
     //window.opener.opener.opener.writeStringToFile('resource://objects',json.id, temp);
-    window.opener.opener.opener.writeStringToFile(window.arguments[2], json.id, temp);
+    //window.opener.opener.opener.writeStringToFile(window.arguments[2], json.id, temp);
 
     //json.resourcedefs[document.getElementById(textbox_create_resource_id).value]=new_json_obj;
 
@@ -96,7 +168,6 @@ function onLoad(){
     //var temp = JSON.stringify(json);
     //alert(temp);
     //writeStringToFile('resource://objects',json.id, temp);
-
 
   }
 
@@ -114,16 +185,16 @@ function updateAddedResouces()
 function refresh()
 {
   document.getElementById('textbox_create_resource_id').value="";
-  document.getElementById('textbox_create_resource_id').placeholder="Eg. 0";
+  document.getElementById('textbox_create_resource_id').placeholder="For e.g, 0";
   
   document.getElementById('textbox_create_resource_name').value="";
-  document.getElementById('textbox_create_resource_name').placeholder="Eg. LWM2M Server URI";
+  document.getElementById('textbox_create_resource_name').placeholder="For e.g, LWM2M Server URI";
 
-  document.getElementById('textbox_create_resource_operations').value="";
-  document.getElementById('textbox_create_resource_operations').placeholder="-";
+  //document.getElementById('textbox_create_resource_operations').value="";
+  //document.getElementById('textbox_create_resource_operations').placeholder="-";
 
-  document.getElementById('textbox_create_resource_type').value="";
-  document.getElementById('textbox_create_resource_type').placeholder="string";
+  //document.getElementById('textbox_create_resource_type').value="";
+  //document.getElementById('textbox_create_resource_type').placeholder="string";
 
   document.getElementById('textbox_create_resource_range').value="";
   document.getElementById('textbox_create_resource_range').placeholder="0-255 bytes";
@@ -135,78 +206,168 @@ function refresh()
   document.getElementById('textbox_create_resource_description').placeholder="Resource description goes here";
 }
 
+function fill()
+{
+  //document.getElementById('textbox_create_resource_id').value = document.getElementById('menulist_edit_resource').selectedItem.value;
+  //document.getElementById('textbox_create_resource_id').value = master_object_window_object_resource_creation.window.arguments[1].name;
+  let x=window.arguments[1];
+  document.getElementById('textbox_create_resource_id').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].id;
+  document.getElementById('textbox_create_resource_name').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].name;
+
+  var v = master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].operations;
+  
+  if(v=="-")
+  {document.getElementById('checkbox_read').setAttribute('checked', false);
+   document.getElementById('checkbox_write').setAttribute('checked', false);
+   document.getElementById('checkbox_execute').setAttribute('checked', false);
+  }
+  else
+  {if(v.search("R") != -1)
+     {document.getElementById('checkbox_read').setAttribute('checked', true);}
+   if(v.search("W") != -1)
+     {document.getElementById('checkbox_write').setAttribute('checked', true);}
+   if(v.search("E") != -1)
+     {document.getElementById('checkbox_execute').setAttribute('checked', true);}
+  }
+
+  //document.getElementById('textbox_create_resource_operations').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].operations;
+
+  var v1 = master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].type;
+
+  var v;
+  switch(v1)
+  { case "string" : v = 0; break;
+    case "boolean" : v = 1; break;
+    case "integer" : v = 2; break;
+    case "opaque" : v = 3; break;
+    case "time" : v = 4; break;
+    case "objlnk" : v = 5; break;
+  }
+  document.getElementById('menulist_type').selectedIndex = v;
+
+  //document.getElementById('textbox_create_resource_type').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].type;
+
+
+  document.getElementById('textbox_create_resource_range').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].range;
+  document.getElementById('textbox_create_resource_units').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].units;
+  document.getElementById('textbox_create_resource_description').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].description;
+
+  if( master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].instancetype == "single")
+  { document.getElementById('radio_create_resource_instance_type_single').setAttribute('selected', true);
+    document.getElementById('radio_create_resource_instance_type_multiple').setAttribute('selected', false);
+  }
+  else if ( master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].instancetype == "multiple" )
+  { document.getElementById('radio_create_resource_instance_type_single').setAttribute('selected', false);
+    document.getElementById('radio_create_resource_instance_type_multiple').setAttribute('selected', true);
+  }
+
+  if( master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].mandatory == true)
+  { document.getElementById('checkbox_create_resource_mandatory').setAttribute('checked', true);
+  }
+  else if( master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].mandatory == false )
+  { document.getElementById('checkbox_create_resource_mandatory').setAttribute('checked', false);
+  }
+
+
+}
 
 ]]>
 </script>
 
+<!-- <button label="test" oncommand="alert(testdata);" /> -->
 
    <hbox>
-     <label id="label_added_resources" value="Added resources:" />
-     <label id="label_added" disabled="true" />
-   </hbox>
-
-
-   <hbox>
-     <label id="label_resource_definition" value="Resource definition:" />
+     <label id="label_added_resources" value="Added resources:" hidden="true" />
+     <label id="label_added" disabled="true" hidden="true" />
    </hbox>
 
    <hbox>
-     <label id="label_create_resource_id" value="Resource Id:" />
-     <textbox id="textbox_create_resource_id" placeholder="Eg. 0" />
+     <spacer flex="1"/>
+     <menulist id="menulist_edit_resource" hidden="true" oncommand="fill();">
+       <menupopup id="menupopup_edit_resource">
+	 <menuitem label="Select Resource"/>
+       </menupopup>
+     </menulist>
    </hbox>
 
-   <hbox>
-     <label id="label_create_resource_name" value="Resource name:" />
-     <textbox id="textbox_create_resource_name" placeholder="Eg. LWM2M Server URI" />
-   </hbox>
+   <groupbox>
+     <caption label="Resource definition:" />
 
-   <hbox>
-     <label id="label_create_resource_operations" value="Resource operations:" />
-     <textbox id="textbox_create_resource_operations" placeholder="-" />
-   </hbox>
+     <grid>
+       <columns>
+         <column flex="1"/>
+         <column flex="1"/>
+       </columns>
+       <rows>
+	 <row>
+           <label id="label_create_resource_id" value="Resource Id:" />
+           <textbox id="textbox_create_resource_id" placeholder="For e.g, 0" />
+	 </row>
+	 <row>
+           <label id="label_create_resource_name" value="Resource name:" />
+           <textbox id="textbox_create_resource_name" placeholder="For e.g, LWM2M Server URI" />
+         </row>
+         <row>
+           <label id="label_create_resource_operations" value="Resource operations:" />
+           <!-- <textbox id="textbox_create_resource_operations" placeholder="-" /> -->
+           <hbox>
+             <checkbox id="checkbox_read" label="Read" />
+             <checkbox id="checkbox_write" label="Write" />
+             <checkbox id="checkbox_execute" label="Execute" />
+	   </hbox>
+         </row>
+         <row>
+           <label id="label_create_resource_instance_type" value="Instance type:" />
+           <radiogroup id="radiogroup_create_resource_instance_type">
+             <radio id="radio_create_resource_instance_type_single" label="Single" value="single" />
+             <radio id="radio_create_resource_instance_type_multiple" label="Multiple" value="multiple" />
+           </radiogroup>
+         </row>
+         <row>
+           <checkbox id="checkbox_create_resource_mandatory" label="Mandatory" />
+         </row>
+         <row>
+           <label id="label_create_resource_type" value="Resource type:" />
+           <!-- <textbox id="textbox_create_resource_type" placeholder="string" /> -->
+           <menulist id="menulist_type">
+             <menupopup id="menupopup_type">
+               <menuitem id="menuitem_string" label="string" value="string" selected="true"/>
+               <menuitem id="menuitem_boolean" label="boolean" value="boolean"/>
+               <menuitem id="menuitem_integer" label="integer" value="integer"/>
+               <menuitem id="menuitem_opaque" label="opaque" value="opaque"/>
+               <menuitem id="menuitem_time" label="time" value="time"/>
+               <menuitem id="menuitem_objlnk" label="objlnk" value="objlnk"/>
+             </menupopup>
+           </menulist>
+         </row>
+         <row>
+           <label id="label_create_resource_range" value="Resource range:" />
+           <textbox id="textbox_create_resource_range" placeholder="0-255 bytes" />
+         </row>
+         <row>
+           <label id="label_create_resource_units" value="Resource units:" />
+           <textbox id="textbox_create_resource_units" placeholder="1" />
+         </row>
+         <row>
+           <label id="label_create_resource_description" value="Resource description:" />
+           <textbox id="textbox_create_resource_description" placeholder="Resource description goes here" multiline="true" />
+         </row>
+         <row>
+           <spacer flex="1"/>
+           <button id="button_add_resource" label="Add Resource" oncommand="createResourceInObject(); updateAddedResouces(); window.opener.update_resource_list(); refresh(); window.close();" />
+         </row>
+       </rows>
+     </grid>
 
-   <hbox>
-     <label id="label_create_resource_instance_type" value="Instance type:" />
-     <radiogroup id="radiogroup_create_resource_instance_type">
-       <radio id="radio_create_resource_instance_type_single" label="Single" value="single" />
-       <radio id="radio_create_resource_instance_type_multiple" label="Multiple" value="multiple" />
-     </radiogroup>
-   </hbox>
+   </groupbox>
 
-   <hbox>
-     <checkbox id="checkbox_create_resource_mandatory" label="Mandatory" />
-   </hbox>
-
-   <hbox>
-     <label id="label_create_resource_type" value="Resource type:" />
-     <textbox id="textbox_create_resource_type" placeholder="string" />
-   </hbox>
-
-   <hbox>
-     <label id="label_create_resource_range" value="Resource range:" />
-     <textbox id="textbox_create_resource_range" placeholder="0-255 bytes" />
-   </hbox>
-
-   <hbox>
-     <label id="label_create_resource_units" value="Resource units:" />
-     <textbox id="textbox_create_resource_units" placeholder="1" />
-   </hbox>
-
-   <hbox>
-     <label id="label_create_resource_description" value="Resource description:" />
-     <textbox id="textbox_create_resource_description" placeholder="Resource description goes here" />
-   </hbox>
-
-   <hbox>
-     <button id="button_add_resource" label="Add resource" oncommand="createResourceInObject(); updateAddedResouces(); alert('Added resource'); refresh();" />
-     <spacer flex="1" />
-     <button id="button_finish" label="Save" oncommand="window.opener.refresh(); close();" />
-   </hbox>
 
 
 <!--
    <hbox>
-     <button id="button_done" label="Done" />
+     <button id="button_add_resource" label="Add Resource" oncommand="createResourceInObject(); updateAddedResouces(); window.opener.update_resource_list(); alert('Added resource'); refresh(); window.close();" />
+     <spacer flex="1" />
+      <button id="button_finish" label="Save" oncommand="window.opener.refresh(); close();" />
    </hbox>
 -->
 

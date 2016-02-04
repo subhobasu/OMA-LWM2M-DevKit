@@ -39,7 +39,7 @@
         orient     = "vertical"
         xmlns      = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:html = "http://www.w3.org/1999/xhtml"
-        onload     = "Lwm2mDevKit.main()"
+        onload     = "Lwm2mDevKit.main(); populate();"
         onunload   = "Lwm2mDevKit.unload()">
 
 	<script type="application/x-javascript" charset="utf-8" src="chrome://lwm2m-devkit/content/namespace.js" />
@@ -753,10 +753,12 @@ function loadExample()
   {saveClientConfig();
   }
 
-  var str_selected_client = "example-client";
+  var str_selected_client = "Example-Client";
   Lwm2mDevKit.client = JSON.parse(readStringFromFile(Lwm2mDevKit.behavior.clients_folder,str_selected_client));
   Lwm2mDevKit.clearTree();
   setClientTree(Lwm2mDevKit.client);
+
+  Lwm2mDevKit.activateButtons();
   
 }
 
@@ -772,6 +774,8 @@ function loadSelectedClient()
   Lwm2mDevKit.client = JSON.parse(readStringFromFile(Lwm2mDevKit.behavior.clients_folder,str_selected_client));
   Lwm2mDevKit.clearTree();
   setClientTree(Lwm2mDevKit.client);
+  Lwm2mDevKit.activateButtons();
+  document.getElementById('panel_device_loading').hidePopup();
 
 }
 
@@ -779,12 +783,11 @@ function update_clients_folder_and_copy(clients_folder)
 {
   Lwm2mDevKit.behavior.clients_folder = clients_folder;
   Lwm2mDevKit.saveBehavior();
-
 Components.utils.import("resource://gre/modules/FileUtils.jsm");
-var file = new FileUtils.File( Lwm2mDevKit.behavior.clients_folder + slash + "example-client" + ".json");
+var file = new FileUtils.File( Lwm2mDevKit.behavior.clients_folder + slash + "Example-Client" + ".json");
 if(!file.exists())
 {
-  writeStringToFile(Lwm2mDevKit.behavior.clients_folder, "example-client", readStringFromFile(readStringFromUrl('resource://clients'), "example-client") );
+  writeStringToFile(Lwm2mDevKit.behavior.clients_folder, "Example-Client", readStringFromFile(readStringFromUrl('resource://clients'), "Example-Client") );
 }
 
 }
@@ -882,8 +885,9 @@ if(!file.exists())
 	</panel>
 
 	<panel id="panel_device_loading" class="interface full" position="bottomright topright">
+	     <hbox>
 		<vbox>
-			<button id="example_client" class="special-button" label="Example Client"
+			<button hidden="true" id="example_client" class="special-button" label="Example Client"
 				accesskey="E"
 				oncommand="loadExample(); document.getElementById('panel_device_loading').hidePopup();
 
@@ -895,6 +899,8 @@ if(!file.exists())
 			<separator />
                         <listbox id="listbox_list_of_saved_clients" rows="5">
                         </listbox>
+
+
                         <button id="button_load" class="special-button" label="Load" onclick="loadSelectedClient(); 
         document.getElementById('panel_device_loading').hidePopup();
         document.getElementById('box_startup').hidden = false;
@@ -903,14 +909,30 @@ if(!file.exists())
         document.getElementById('box_object_definitions').hidden = true;
         document.getElementById('box_resource_definitions').hidden = true; " />
 
-			<button id="load_from_file" class="special-button" label="New Client"
-				accesskey="N"
-                                oncommand="window.openDialog('chrome://lwm2m-devkit/content/window_client_creation.xul', 'window_client_creation', 'chrome,centerscreen,modal', master_object, Lwm2mDevKit.behavior.clients_folder, Lwm2mDevKit.behavior.objects_folder ); " />
 
 		<!--		oncommand="test(); document.getElementById('panel_device_loading').hidePopup(); document.getElementById('panel_create_client').openPopup();" />  
                   -->
 
 		</vbox>
+
+                <vbox>
+			<spacer flex="1"/>
+			<button id="load_from_file" class="special-button" label="New Client"
+				accesskey="N"
+                                oncommand="window.openDialog('chrome://lwm2m-devkit/content/window_client_creation.xul', 'window_client_creation', 'chrome,centerscreen,modal', master_object, Lwm2mDevKit.behavior.clients_folder, Lwm2mDevKit.behavior.objects_folder, 'a', null ); " />
+
+			<button label="Edit Client" class="special-button" accesskey="E" 
+oncommand="
+if(document.getElementById('listbox_list_of_saved_clients').selectedItem != null)
+{
+window.openDialog('chrome://lwm2m-devkit/content/window_client_creation.xul', 'window_client_creation', 'chrome,centerscreen,modal', master_object, Lwm2mDevKit.behavior.clients_folder, Lwm2mDevKit.behavior.objects_folder, 'e', JSON.parse(readStringFromFile(Lwm2mDevKit.behavior.clients_folder, document.getElementById('listbox_list_of_saved_clients').selectedItem.value))   );}
+else
+{alert('Select a client from the list to edit');
+}  " />
+
+			<button label="Delete Client" class="special-button" accesskey="D" oncommand="deleteClient();" />
+		</vbox>
+	     </hbox>
 	</panel>
 
 	<panel id="panel_bootstrap" class="interface" position="bottomleft topleft" onpopupshowing="event.preventDefault();"></panel>
@@ -1200,6 +1222,19 @@ if(!file.exists())
 <script type="application/x-javascript" charset="utf-8">
 <![CDATA[ //Cdata for less than operator
 
+
+function deleteClient()
+{
+  var filename = document.getElementById('listbox_list_of_saved_clients').selectedItem.value;
+  Components.utils.import("resource://gre/modules/FileUtils.jsm");
+  var file = new FileUtils.File( Lwm2mDevKit.behavior.clients_folder + slash + filename + ".json");
+  alert(file.path);
+  file.remove(false);
+  populate();
+  Lwm2mDevKit.client = null;
+}
+
+
 function populate()
 {
   var parent = document.getElementById("listbox_list_of_saved_clients");
@@ -1242,13 +1277,15 @@ for (let i in array)
 for(let i=0; i < array.length ; i++)
 {
 
- if (  (/^example-client$/.test(array[i])) || (/^DEVKIT$/.test(array[i])) )
+ //if (  (/^example-client$/.test(array[i])) || (/^DEVKIT$/.test(array[i])) )
+ if (  (/^DEVKIT$/.test(array[i])) )
  {continue;
  }
 
   var child = document.createElement("listitem");
   child.setAttribute('label', array[i]);
   child.setAttribute('value', array[i]);
+  child.setAttribute('ondblclick', "loadSelectedClient();");
   parent.appendChild(child);
 
 }

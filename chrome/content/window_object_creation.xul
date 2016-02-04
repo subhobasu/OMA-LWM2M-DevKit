@@ -2,13 +2,14 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
 <window id = "window_object_creation"
-        title = "Create Object"
+        title = "Object"
 	height = "300"
 	width = "400"
         xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload = "onLoad();"
         onunload = "update_master_object_window_client_creation();" >
 
+<script type="application/x-javascript" charset="utf-8" src="chrome://lwm2m-devkit/content/filePicker.js" />
 <script>
 <![CDATA[
 
@@ -27,6 +28,43 @@ function onLoad(){
   master_object_window_object_creation = window.arguments[0]; //holds the master object from the client creation window...
   document.getElementById('textbox_objects_folder').value = window.arguments[1];
   //document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+
+  if(window.arguments[2] == 'e')
+  {
+   document.getElementById('menulist_edit_object').setAttribute('hidden', "false");
+   for(let count in master_object_window_object_creation)
+   {
+    menuitem = document.createElement('menuitem');
+    menuitem.setAttribute('label', master_object_window_object_creation[count].id + " (" + master_object_window_object_creation[count].name + ")");
+    menuitem.setAttribute('value', master_object_window_object_creation[count].id);
+    document.getElementById('menupopup_edit_object').appendChild(menuitem);
+   }
+
+   document.getElementById('button_create_object').setAttribute('label', "Save");
+   document.getElementById('textbox_create_object_id').setAttribute('disabled', true);
+   setListeners();
+  }
+  
+}
+
+function setListeners()
+{
+  document.getElementById('textbox_create_object_name').addEventListener("change", updateObjectDef, false);
+  document.getElementById('textbox_create_object_description').addEventListener("change", updateObjectDef, false);
+  document.getElementById('radio_create_object_instance_type_single').addEventListener("click", updateObjectDef, false);
+  document.getElementById('radio_create_object_instance_type_multiple').addEventListener("click", updateObjectDef, false);
+  document.getElementById('checkbox_create_object_mandatory').addEventListener("click", updateObjectDef, false);
+  
+}
+
+function updateObjectDef()
+{
+  master_object_window_object_creation[document.getElementById('textbox_create_object_id').value].name = document.getElementById('textbox_create_object_name').value;
+  master_object_window_object_creation[document.getElementById('textbox_create_object_id').value].description = document.getElementById('textbox_create_object_description').value;
+  master_object_window_object_creation[document.getElementById('textbox_create_object_id').value].instancetype = (document.getElementById('radio_create_object_instance_type_single').selected == true ? "single":"multiple") ;
+  master_object_window_object_creation[document.getElementById('textbox_create_object_id').value].mandatory = (document.getElementById('checkbox_create_object_mandatory').checked == true ? true:false) ;
+  
+  document.getElementById('button_create_object').setAttribute('disabled', false);
 }
 
   function createObject()
@@ -55,32 +93,121 @@ function onLoad(){
 
     if( master_object_window_object_creation[json.id] == undefined)
     {
-      master_object_window_object_creation[json.id] = json; alert("Created object");
+      master_object_window_object_creation[json.id] = json; //alert("Created object");
     }
     else
     {
-      master_object_window_object_creation[json.id] = json; alert("Object already existed...overwritten...");
+      master_object_window_object_creation[json.id] = json; //alert("Object already existed...overwritten...");
     }
 
     var temp = JSON.stringify(json);
     //alert(temp);
     //window.opener.opener.writeStringToFile('resource://objects',json.id, temp); //writes the object to disk
-    window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, json.id, temp); //writes the object to disk
+  //window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, json.id, temp); //writes the object to disk
     //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
     //Lwm2mDevKit.objectDefinitions = master_object;
+    window.opener.master_object_window_client_creation = master_object_window_object_creation;
+    //window.opener.opener.master_object = master_object_window_object_creation;
+
+    //window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, "master_object_file", JSON.stringify(master_object_window_object_creation) ); //writes the master object to disk
+    
   }
+
+function save()
+{
+
+window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, document.getElementById('textbox_create_object_id').value, JSON.stringify(master_object_window_object_creation[ document.getElementById('textbox_create_object_id').value ]) ); //writes the object to disk
+window.opener.opener.master_object = master_object_window_object_creation; //update master object
+
+window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, "master_object_file", JSON.stringify(master_object_window_object_creation) ); //writes the master object to disk
+
+}
+
+function update_resource_list()
+{
+  //alert(str);
+
+  while( document.getElementById('listbox_resources').hasChildNodes() )
+  { document.getElementById('listbox_resources').removeItemAt(0);
+  }
+  
+//var count=0;
+for( var i in master_object_window_object_creation[ document.getElementById("textbox_create_object_id").value ].resourcedefs )
+{//count++;
+ //alert( master_object_window_object_creation[100].resourcedefs[i].id );
+
+  if( master_object_window_object_creation[document.getElementById("textbox_create_object_id").value].resourcedefs[i] != null )
+  {
+   let listitem = document.createElement('listitem');
+   listitem.setAttribute('label', master_object_window_object_creation[document.getElementById("textbox_create_object_id").value].resourcedefs[i].id + " (" + master_object_window_object_creation[document.getElementById("textbox_create_object_id").value].resourcedefs[i].name + ")" );
+   listitem.setAttribute('value', master_object_window_object_creation[document.getElementById("textbox_create_object_id").value].resourcedefs[i].id );
+   document.getElementById('listbox_resources').appendChild(listitem);
+  }
+
+}
+
+  if( document.getElementById('listbox_resources').hasChildNodes() )
+  { document.getElementById('button_create_object').setAttribute('disabled', false); }
+  else
+  { document.getElementById('button_create_object').setAttribute('disabled', true); }
+}
 
 function refresh()
 {
   document.getElementById('textbox_create_object_id').value="";
-  document.getElementById('textbox_create_object_id').placeholder="Eg. 10";
+  document.getElementById('textbox_create_object_id').placeholder="For e.g, 10";
 
   document.getElementById('textbox_create_object_name').value="";
-  document.getElementById('textbox_create_object_name').placeholder="Eg. LWM2M Security";
+  document.getElementById('textbox_create_object_name').placeholder="For e.g, LWM2M Security";
 
   document.getElementById('textbox_create_object_description').value="";
   document.getElementById('textbox_create_object_description').placeholder="Object description goes here...";
 }
+
+function deleteResource()
+{
+  let x = document.getElementById('listbox_resources').selectedItem.value;
+  master_object_window_object_creation[ document.getElementById('textbox_create_object_id').value ].resourcedefs[x] = null;
+  window.opener.master_object_window_client_creation = master_object_window_object_creation;
+  window.opener.opener.master_object = master_object_window_object_creation;
+  //alert(JSON.stringify(master_object_window_object_creation));
+
+  window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, "master_object_file", JSON.stringify(master_object_window_object_creation) ); //writes the master object to disk
+  
+  window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, document.getElementById('textbox_create_object_id').value, JSON.stringify( master_object_window_object_creation[ document.getElementById('textbox_create_object_id').value ] ) ); //writes the object to disk
+
+  update_resource_list();
+
+}
+
+function fill()
+{
+  document.getElementById('textbox_create_object_id').value =  master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].id;
+  document.getElementById('textbox_create_object_name').value =  master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].name;
+  document.getElementById('textbox_create_object_description').value =  master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].description;
+
+
+
+  if( master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].instancetype == "single")
+  { document.getElementById('radio_create_object_instance_type_single').setAttribute('selected', true);
+    document.getElementById('radio_create_object_instance_type_multiple').setAttribute('selected', false);
+  }
+  else if ( master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].instancetype == "multiple" )
+  { document.getElementById('radio_create_object_instance_type_single').setAttribute('selected', false);
+    document.getElementById('radio_create_object_instance_type_multiple').setAttribute('selected', true);
+  }
+
+  if( master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].mandatory == true)
+  { document.getElementById('checkbox_create_object_mandatory').setAttribute('checked', true);
+  }
+  else if( master_object_window_object_creation[ document.getElementById('menulist_edit_object').selectedItem.value ].mandatory == false )
+  { document.getElementById('checkbox_create_object_mandatory').setAttribute('checked', false);
+  }
+
+  update_resource_list();
+
+}
+
 
 ]]>
 </script>
@@ -91,46 +218,124 @@ function refresh()
    </hbox>
 -->
 
-   <hbox>
-     <label id="label_create_object_id" value="Object Id:" />
-     <textbox id="textbox_create_object_id" placeholder="Eg. 10" />
-   </hbox>
+ <hbox>
+  <vbox>
+
 
    <hbox>
-     <label id="label_create_object_name" value="Object name:" />
-     <textbox id="textbox_create_object_name" placeholder="Eg. LWM2M Security" />
+     <spacer flex="1"/>
+     <menulist id="menulist_edit_object" hidden="true" oncommand="fill();">
+       <menupopup id="menupopup_edit_object">
+	  <menuitem label="Select Object"/>
+       </menupopup>
+     </menulist>
    </hbox>
+
+   <groupbox>
+   <caption label="Object" />
+
+   <grid>
+       <columns>
+         <column flex="1"/>
+         <column flex="1"/>
+       </columns>
+
+       <rows>
+	<row>
+          <label id="label_create_object_id" value="Object Id:" />
+          <textbox id="textbox_create_object_id" placeholder="Eg. 10" />
+	</row>
+
+        <row>
+          <label id="label_create_object_name" value="Object name:" />
+          <textbox id="textbox_create_object_name" placeholder="Eg. LWM2M Security" />
+	</row>
+
+        <row>
+          <label id="label_create_object_instance_type" value="Instance type:" />
+          <radiogroup id="radiogroup_create_object_instance_type">
+            <radio id="radio_create_object_instance_type_single" label="Single" value="single" selected="true" />
+            <radio id="radio_create_object_instance_type_multiple" label="Multiple" value="multiple" />
+          </radiogroup>
+	</row>
+
+	<row>
+	  <spacer flex="1"/>
+          <checkbox id="checkbox_create_object_mandatory" label="Mandatory" />
+	</row>
+
+	<row>
+          <label id="label_create_object_description" value="Description:" />
+          <textbox id="textbox_create_object_description" multiline="true" placeholder="Object description goes here..." />
+	</row>
+
+	<row>
+          <label value="Save object in folder:" hidden="true"/>
+          <textbox id="textbox_objects_folder" hidden="true"/>
+	</row>
+       </rows>
+
+
+    </grid>
+  </groupbox>
+
+  <spacer flex="1"/>
+
+
+
+
 
    <hbox>
-     <label id="label_create_object_instance_type" value="Instance type:" />
-     <radiogroup id="radiogroup_create_object_instance_type">
-       <radio id="radio_create_object_instance_type_single" label="Single" value="single" selected="true" />
-       <radio id="radio_create_object_instance_type_multiple" label="Multiple" value="multiple" />
-     </radiogroup>
+
+
+     <button id="button_create_object" label="Create Object" disabled="true" oncommand=" 
+	var path = filePicker();
+	alert('The folder settings may be changed in the preference tab');
+	document.getElementById('textbox_objects_folder').value=path;
+	window.opener.opener.update_objects_folder_and_copy(document.getElementById('textbox_objects_folder').value);
+        save();
+	window.close(); " />
+
+     <spacer flex="1"/>
+
+     <button id="button_add_resource" label="Add Resource" oncommand="
+if(!document.getElementById('listbox_resources').hasChildNodes())
+{createObject();} 
+
+window.opener.onLoad();
+        window.opener.opener.update_objects_folder_and_copy(document.getElementById('textbox_objects_folder').value); 
+        window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation,
+        document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value, 'a' ); " />
+
+
+     <spacer flex="1"/>
+
+     <button id="button_edit_resource" label="Edit Resource" oncommand="
+if(!document.getElementById('listbox_resources').hasChildNodes())
+{alert('No resources exist, add some resource first by clicking \'Add Resource\'');}
+else
+{
+window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation,
+        document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value, 'e', document.getElementById('listbox_resources') );
+}
+" />
+
+
    </hbox>
+  </vbox>
 
-   <hbox>
+  <vbox>
+    <groupbox>
+      <caption label="Resources" />
 
-     <checkbox id="checkbox_create_object_mandatory" label="Mandatory" />
-   </hbox>
+      <listbox id="listbox_resources">
+      </listbox>
+    </groupbox>
 
-   <hbox>
-     <label id="label_create_object_description" value="Description:" />
-     <textbox id="textbox_create_object_description" multiline="true" placeholder="Object description goes here..." />
-   </hbox>
+    <button id="button_delete_resource" label="Delete Resource" oncommand="deleteResource(); " />
+  </vbox>
 
-     <hbox>
-        <label value="Save object in folder:"/>
-        <textbox id="textbox_objects_folder" />
-     </hbox>
-
-   <hbox>
-     <button id="button_create_object" label="Create object" oncommand="createObject(); window.opener.onLoad();
-        window.opener.opener.update_objects_folder_and_copy(document.getElementById('textbox_objects_folder').value);
-	window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation, 
-	document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value ); " />
-   </hbox>
-
+ </hbox>
 
 
 

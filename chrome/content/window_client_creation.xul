@@ -53,6 +53,7 @@ function setStatus(text) {
         onload = "onLoad();"
         onunload = "update_master_object();" >
 
+<script type="application/x-javascript" charset="utf-8" src="chrome://lwm2m-devkit/content/filePicker.js" />
 
 <script>
 <![CDATA[
@@ -104,13 +105,39 @@ function update_master_object()
      listitem.setAttribute('label', str);
      listitem.setAttribute('value', dataObj.id);
      listitem.setAttribute('ondragstart', "event.dataTransfer.setData('text/plain',null)");
+     listitem.setAttribute('ondblclick', "move('listbox_available_objects','listbox_selected_objects');");
      
      listbox_available_objects.appendChild(listitem);
     }
 
+
      document.getElementById('textbox_clients_folder').value = window.arguments[1];
 
-        }
+    if(window.arguments[3] == 'e')
+    {
+      fill();
+      document.getElementById('button_create').setAttribute('label', "Save");
+    }
+
+}
+
+function fill()
+{
+  var json_client = window.arguments[4];
+  document.getElementById('textbox_client_name').value = json_client.endpointClientName;
+  for (let i in json_client.objects)
+  {   var j = 0;
+      json_client.objects[i];
+      while(document.getElementById('listbox_available_objects').hasChildNodes() && j < document.getElementById('listbox_available_objects').itemCount)
+      {  if(document.getElementById('listbox_available_objects').getItemAtIndex(j).value == json_client.objects[i])
+         { document.getElementById('listbox_available_objects').selectedIndex = j;
+           move('listbox_available_objects', 'listbox_selected_objects');
+	   break;
+         }
+         j++;
+      }
+  }
+}
 
 
 function move(from, to)
@@ -122,11 +149,16 @@ function move(from, to)
    //alert(sel.length);
 
    for (let i=0; i < sel.length; i++)
-   {
+   {if(from=='listbox_available_objects')
+      sel[i].setAttribute('ondblclick', "move('listbox_selected_objects', 'listbox_available_objects');");
+    else if(from=='listbox_selected_objects')
+      sel[i].setAttribute('ondblclick', "move('listbox_available_objects', 'listbox_selected_objects');");
+
     t.appendChild(sel[i]);
     //f.removeChild(sel[i]);
     i--;
    }
+
 
 
 }
@@ -214,6 +246,7 @@ function addMandatoryObjects(e)
         {
 
           var sel = f.getItemAtIndex(j);
+          sel.setAttribute('ondblclick', "move('listbox_selected_objects', 'listbox_available_objects');");
           f.removeChild(sel);
           t.appendChild(sel);
 
@@ -228,6 +261,27 @@ function addMandatoryObjects(e)
 
 //
 }
+
+
+function deleteObject()
+{
+  let x = document.getElementById('listbox_available_objects').selectedItem.value;
+  master_object_window_client_creation[x] = null;
+  window.opener.master_object = master_object_window_client_creation;
+
+  window.opener.writeStringToFile( window.arguments[2], "master_object_file", JSON.stringify(master_object_window_client_creation) ); //writes the master object to disk
+  //window.opener.writeStringToFile( window.arguments[2], x, null ); //writes the object to disk with null
+
+
+  //removes the object file from disk
+  Components.utils.import("resource://gre/modules/FileUtils.jsm");
+  var file = new FileUtils.File( window.arguments[2] + window.opener.slash + x + ".json");
+  //alert(file.path);
+  file.remove(false);
+  onLoad();
+
+}
+
 
 
 //-------------------------------------------------
@@ -307,6 +361,7 @@ document.addEventListener("drop", function( event ) {
      </hbox>
 
      <hbox>
+      <vbox>
        <groupbox flex="1">
          <caption label="Available Objects"/>
 
@@ -314,34 +369,71 @@ document.addEventListener("drop", function( event ) {
           <!-- <listitem label="Perl" /> -->
          </listbox>
        </groupbox>
+       <spacer flex="1"/>
+       <hbox>
+       <button id="button_edit_object" label="Edit Object" oncommand=" window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2], 'e' ); " />
+       <spacer flex="1" />
+       <button id="button_new_object" width="100" label="New Object" oncommand=" master_object_window_client_creation = window.arguments[0];
+                window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2], 'a' );
+
+        document.getElementById('panel_create_client').hidePopup(); document.getElementById('panel_create_object').openPopup(document.getElementById('panel_create_client'), 'overlap', 0, 0);" />
+
+       <button id="button_delete_object" label="Delete Object" oncommand="deleteObject();" />
+      </hbox>
+      </vbox>
 
      <vbox>
        <spacer flex="1" />
        <button id="button_move_right" label=">>>" oncommand="move('listbox_available_objects','listbox_selected_objects');" />
        <button id="button_move_left" label="&lt;&lt;&lt;" oncommand="move('listbox_selected_objects','listbox_available_objects');"/>
+       <button id="button_add_mandatory_objects" label="Add mandatory objects" onclick="document.getElementById('checkbox_add_mandatory_objects').setAttribute('checked', 'true'); addMandatoryObjects(event);" />
+       <spacer flex="1" />
      </vbox>
 
+     <vbox>
        <groupbox>
-         <caption label="Client objects" />
+         <caption label="Client Objects" />
 
          <listbox id="listbox_selected_objects" class="dropzone" seltype="multiple">
+<!--
+<listhead>
+ <listheader label="First"/>
+ <listheader label="Last"/>
+</listhead>
+<listcols>
+ <listcol flex="1"/>
+ <listcol flex="1"/>
+</listcols>
+<listitem>
+ <listcell label="test1"/>
+ <listcell label="test3"/>
+</listitem>
+
+ <listitem label="test"/>
+-->
 
          </listbox>
        </groupbox>
+       <spacer flex="1"/>
+       <button id="button_create" width="100" label="Create" oncommand=" var path = filePicker();
+		alert('The folder settings may be changed in the preference tab');
+               document.getElementById('textbox_clients_folder').value=path;
+   createClient(); window.opener.update_clients_folder_and_copy(document.getElementById('textbox_clients_folder').value); window.close();" />
+     </vbox>
      </hbox>
 
      <hbox>
-       <button id="button_new_object" label="New object" oncommand=" master_object_window_client_creation = window.arguments[0];
+<!--       <button id="button_new_object" width="200" label="New object" oncommand=" master_object_window_client_creation = window.arguments[0];
 		window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2] );
 
-	document.getElementById('panel_create_client').hidePopup(); document.getElementById('panel_create_object').openPopup(document.getElementById('panel_create_client'), 'overlap', 0, 0);" />
+	document.getElementById('panel_create_client').hidePopup(); document.getElementById('panel_create_object').openPopup(document.getElementById('panel_create_client'), 'overlap', 0, 0);" /> -->
        <spacer flex="1" />
-       <checkbox id="checkbox_add_mandatory_objects" label="Add mandatory objects" checked="false" onclick="addMandatoryObjects(event);" />
-       <button id="button_create" label="Create" oncommand="createClient(); window.opener.update_clients_folder_and_copy(document.getElementById('textbox_clients_folder').value); window.close();" />
+       <checkbox hidden="true" id="checkbox_add_mandatory_objects" label="Add mandatory objects" checked="false" onclick="addMandatoryObjects(event);" />
+<!--       <button id="button_create" width="200" label="Create" oncommand="createClient(); window.opener.update_clients_folder_and_copy(document.getElementById('textbox_clients_folder').value); window.close();" /> -->
      </hbox>
      <hbox>
-        <label value="Save client in folder:"/>
-	<textbox id="textbox_clients_folder" />
+        <label hidden="true" value="Save client in folder:"/>
+	<textbox hidden="true" id="textbox_clients_folder" />
      </hbox>
    </vbox>
  
@@ -361,6 +453,10 @@ document.addEventListener("drop", function( event ) {
 </style>
 
 -->
+
+
+
+
 
 
 </window>
