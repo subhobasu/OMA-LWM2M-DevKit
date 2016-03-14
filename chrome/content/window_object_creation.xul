@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
+
 <window id = "window_object_creation"
         title = "Object"
 	height = "300"
@@ -10,6 +11,94 @@
         onunload = "update_master_object_window_client_creation();" >
 
 <script type="application/x-javascript" charset="utf-8" src="chrome://lwm2m-devkit/content/filePicker.js" />
+
+
+<script>
+<![CDATA[
+
+function onLoad(){
+  master_object_window_object_creation = window.arguments[0]; //holds the master object from the client creation window...
+  document.getElementById('textbox_objects_folder').value = window.arguments[1];
+  //document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
+
+  if(window.arguments[2] == 'e')
+  {
+   //document.getElementById('menulist_edit_object').setAttribute('hidden', "false");
+   var counter=0;
+   var index=0;
+   for(let count in master_object_window_object_creation)
+   {counter++;
+    menuitem = document.createElement('menuitem');
+    menuitem.setAttribute('label', master_object_window_object_creation[count].id + " (" + master_object_window_object_creation[count].name + ")");
+    menuitem.setAttribute('value', master_object_window_object_creation[count].id);
+    document.getElementById('menupopup_edit_object').appendChild(menuitem);
+
+    if(master_object_window_object_creation[count].id == window.arguments[3].value)
+      {index=counter;}
+   }
+
+   document.getElementById('button_create_object').setAttribute('label', "Save");
+   document.getElementById('textbox_create_object_id').setAttribute('disabled', true);
+   setListeners();
+
+   document.getElementById('menulist_edit_object').selectedIndex = index;
+
+   //document.getElementById('textbox_create_object_description').value = window.arguments[0][window.arguments[3].value].name;
+   //document.getElementById('textbox_create_object_description').value = document.getElementById('menulist_edit_object').selectedItem.label;
+   //document.getElementById('textbox_create_object_description').value = window.arguments[3].label; Works
+   fill1();
+
+  }
+
+}
+
+
+
+
+
+function fill1()
+{
+  document.getElementById('textbox_create_object_id').value =  master_object_window_object_creation[ window.arguments[3].value ].id;
+  document.getElementById('textbox_create_object_name').value =  master_object_window_object_creation[ window.arguments[3].value ].name;
+  document.getElementById('textbox_create_object_description').value =  master_object_window_object_creation[ window.arguments[3].value ].description;
+
+
+
+  if( master_object_window_object_creation[ window.arguments[3].value ].instancetype == "single")
+  { document.getElementById('radio_create_object_instance_type_single').setAttribute('selected', true);
+    document.getElementById('radio_create_object_instance_type_multiple').setAttribute('selected', false);
+  }
+  else if ( master_object_window_object_creation[ window.arguments[3].value ].instancetype == "multiple" )
+  { document.getElementById('radio_create_object_instance_type_single').setAttribute('selected', false);
+    document.getElementById('radio_create_object_instance_type_multiple').setAttribute('selected', true);
+  }
+
+  if( master_object_window_object_creation[ window.arguments[3].value ].mandatory == true)
+  { document.getElementById('checkbox_create_object_mandatory').setAttribute('checked', true);
+  }
+  else if( master_object_window_object_creation[ window.arguments[3].value ].mandatory == false )
+  { document.getElementById('checkbox_create_object_mandatory').setAttribute('checked', false);
+  }
+
+  update_resource_list();
+
+}
+
+
+
+
+
+
+
+
+]]>
+</script>
+
+
+
+
+
+
 <script>
 <![CDATA[
 
@@ -23,29 +112,6 @@ function update_master_object_window_client_creation()
   }
 }
 
-
-function onLoad(){
-  master_object_window_object_creation = window.arguments[0]; //holds the master object from the client creation window...
-  document.getElementById('textbox_objects_folder').value = window.arguments[1];
-  //document.getElementById('tb').value = Object.keys(window.arguments[0]).length;
-
-  if(window.arguments[2] == 'e')
-  {
-   document.getElementById('menulist_edit_object').setAttribute('hidden', "false");
-   for(let count in master_object_window_object_creation)
-   {
-    menuitem = document.createElement('menuitem');
-    menuitem.setAttribute('label', master_object_window_object_creation[count].id + " (" + master_object_window_object_creation[count].name + ")");
-    menuitem.setAttribute('value', master_object_window_object_creation[count].id);
-    document.getElementById('menupopup_edit_object').appendChild(menuitem);
-   }
-
-   document.getElementById('button_create_object').setAttribute('label', "Save");
-   document.getElementById('textbox_create_object_id').setAttribute('disabled', true);
-   setListeners();
-  }
-  
-}
 
 function setListeners()
 {
@@ -106,7 +172,7 @@ function updateObjectDef()
   //window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, json.id, temp); //writes the object to disk
     //writeStringToFile('resource://objects',"master_object_file", JSON.stringify(master_object));
     //Lwm2mDevKit.objectDefinitions = master_object;
-    window.opener.master_object_window_client_creation = master_object_window_object_creation;
+    //window.opener.master_object_window_client_creation = master_object_window_object_creation; changed here................
     //window.opener.opener.master_object = master_object_window_object_creation;
 
     //window.opener.opener.writeStringToFile( document.getElementById('textbox_objects_folder').value, "master_object_file", JSON.stringify(master_object_window_object_creation) ); //writes the master object to disk
@@ -288,12 +354,16 @@ function fill()
    <hbox>
 
 
-     <button id="button_create_object" label="Create Object" disabled="true" oncommand=" 
-	var path = filePicker();
+     <button id="button_create_object" label="Create Object" disabled="true" oncommand="
+if(document.getElementById('button_create_object').label === 'Create Object') 
+{	var path = filePicker();
 	alert('The folder settings may be changed in the preference tab');
 	document.getElementById('textbox_objects_folder').value=path;
+}
+        window.opener.master_object_window_client_creation = master_object_window_object_creation;
 	window.opener.opener.update_objects_folder_and_copy(document.getElementById('textbox_objects_folder').value);
         save();
+	window.opener.onLoad();
 	window.close(); " />
 
      <spacer flex="1"/>
@@ -302,7 +372,7 @@ function fill()
 if(!document.getElementById('listbox_resources').hasChildNodes())
 {createObject();} 
 
-window.opener.onLoad();
+
         window.opener.opener.update_objects_folder_and_copy(document.getElementById('textbox_objects_folder').value); 
         window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation,
         document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value, 'a' ); " />
@@ -313,10 +383,14 @@ window.opener.onLoad();
      <button id="button_edit_resource" label="Edit Resource" oncommand="
 if(!document.getElementById('listbox_resources').hasChildNodes())
 {alert('No resources exist, add some resource first by clicking \'Add Resource\'');}
-else
+else if(document.getElementById('listbox_resources').selectedItem != null)
 {
 window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation.xul', 'window_object_resource_creation', 'chrome,centerscreen,modal', master_object_window_object_creation,
-        document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value, 'e', document.getElementById('listbox_resources') );
+        document.getElementById('textbox_create_object_id').value, document.getElementById('textbox_objects_folder').value, 'e', document.getElementById('listbox_resources'), document.getElementById('listbox_resources').selectedItem );
+}
+else
+{
+  alert('Select a Resource from the list to edit');
 }
 " />
 
@@ -333,6 +407,7 @@ window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation
     </groupbox>
 
     <button id="button_delete_resource" label="Delete Resource" oncommand="deleteResource(); " />
+    <button label="Cancel" oncommand="window.close();" />
   </vbox>
 
  </hbox>
@@ -415,5 +490,8 @@ window.openDialog('chrome://lwm2m-devkit/content/window_object_resource_creation
 
 
 -->
+
+
+
 
 </window>

@@ -106,6 +106,7 @@ function update_master_object()
      listitem.setAttribute('value', dataObj.id);
      listitem.setAttribute('ondragstart', "event.dataTransfer.setData('text/plain',null)");
      listitem.setAttribute('ondblclick', "move('listbox_available_objects','listbox_selected_objects');");
+     listitem.setAttribute('class', "dropzone1");
      
      listbox_available_objects.appendChild(listitem);
     }
@@ -159,8 +160,12 @@ function move(from, to)
     i--;
    }
 
-
-
+   //sort
+   t.selectAll();
+   var arr=t.selectedItems;
+   arr.sort(function(a,b){return a.value-b.value});
+   for(let i=0; i < arr.length; )
+      {t.appendChild(arr[0]);}
 }
 
 
@@ -342,12 +347,30 @@ document.addEventListener("drop", function( event ) {
           dragged.parentNode.removeChild( dragged );
           event.target.appendChild( dragged );
       }
+      else if( event.target.className == "dropzone1" )
+      {
+	  dragged.parentNode.removeChild( dragged );
+          event.target.parentNode.appendChild( dragged );
+      }
+
+      sort(document.getElementById('listbox_available_objects'));
+      sort(document.getElementById('listbox_selected_objects'));
     
   }, false);
 
 //------------------------------------------------------------------
 
 //-------------------------------------------------
+
+function sort(t)
+{
+   //sort
+   t.selectAll();
+   var arr=t.selectedItems;
+   arr.sort(function(a,b){return a.value-b.value});
+   for(let i=0; i < arr.length; )
+      {t.appendChild(arr[0]);}
+}
 
 ]]>
 </script>
@@ -371,7 +394,18 @@ document.addEventListener("drop", function( event ) {
        </groupbox>
        <spacer flex="1"/>
        <hbox>
-       <button id="button_edit_object" label="Edit Object" oncommand=" window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2], 'e' ); " />
+       <button id="button_edit_object" label="Edit Object" oncommand=" 
+if(document.getElementById('listbox_available_objects').selectedItem != null)
+{
+
+window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2], 'e', document.getElementById('listbox_available_objects').selectedItem );
+}
+else
+{
+  alert('Select an Object from the list to edit');
+}
+
+" />
        <spacer flex="1" />
        <button id="button_new_object" width="100" label="New Object" oncommand=" master_object_window_client_creation = window.arguments[0];
                 window.openDialog('chrome://lwm2m-devkit/content/window_object_creation.xul', 'window_object_creation', 'chrome,centerscreen,modal', master_object_window_client_creation, window.arguments[2], 'a' );
@@ -415,10 +449,14 @@ document.addEventListener("drop", function( event ) {
          </listbox>
        </groupbox>
        <spacer flex="1"/>
-       <button id="button_create" width="100" label="Create" oncommand=" var path = filePicker();
-		alert('The folder settings may be changed in the preference tab');
+       <button id="button_create" width="100" label="Create" oncommand="
+if(document.getElementById('button_create').label === 'Create')
+{              var path = filePicker();
+	       alert('The folder settings may be changed in the preference tab');
                document.getElementById('textbox_clients_folder').value=path;
+}
    createClient(); window.opener.update_clients_folder_and_copy(document.getElementById('textbox_clients_folder').value); window.close();" />
+       <button label="Cancel" oncommand="window.close();"/>
      </vbox>
      </hbox>
 

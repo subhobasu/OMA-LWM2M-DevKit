@@ -144,7 +144,12 @@ else
 }
 ----------------------*/
 
+createMasterObject();
+
+function createMasterObject()
+{
 //creation of master_object-----------------------
+  master_object = {};
 
 //Lwm2mDevKit.loadBehavior();
 
@@ -189,6 +194,8 @@ for(let i=0; i < array.length ; i++)
 Lwm2mDevKit.objectDefinitions = master_object;
 //writeStringToFile('resource://objects', "master_object_file", JSON.stringify(master_object));
 writeStringToFile(Lwm2mDevKit.behavior.objects_folder, "master_object_file", JSON.stringify(master_object));
+
+}
 
 
 function update_Lwm2mDevKit_objectDefinitions()
@@ -1215,7 +1222,7 @@ else
 
 			<hbox>
 				<button id="button_ping" style="min-width: 5em;" class="special-button" label="Ping" disabled="true" popup="panel_ping" />
-				<button id="button_load_device" flex="1" class="special-button" label="Load LWM2M Client" onclick="populate();" popup="panel_device_loading" />
+				<button id="button_load_device" flex="1" class="special-button" label="Load LWM2M Client" onclick="populate(); createMasterObject();" popup="panel_device_loading" />
 
 <!-- Subho -->
 
@@ -1508,7 +1515,7 @@ function saveClientConfig()
 			<!-- interfaces -->
 			<hbox id="interface_buttons" height="60" style="color: white; background-color: rgb(72,72,72); min-height: 60px;">
 				<button id="button_bootstrap" class="special-button" label="Bootstrap" popup="panel_bootstrap" disabled="true" />
-				<button id="button_registration" class="special-button" label="Client Registration" popup="panel_registration" disabled="true" />
+				<button id="button_registration" class="special-button" label="Client Registration" popup="panel_registration" disabled="true" oncommand="document.getElementById('endpoint_name').value=Lwm2mDevKit.client.endpointClientName;" />
 				<button id="button_service" class="special-button" label="Device Management &amp; Service Enablement" popup="panel_service" disabled="true" />
 				<button id="button_reporting" class="special-button" label="Information Reporting" popup="panel_reporting" disabled="true" />
 				<separator flex="1" />

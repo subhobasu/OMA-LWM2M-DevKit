@@ -10,7 +10,7 @@ const nsIFilePicker = Components.interfaces.nsIFilePicker;
 
 var fp = Components.classes["@mozilla.org/filepicker;1"]
                    .createInstance(nsIFilePicker);
-fp.init(window, "Dialog Title", nsIFilePicker.modeGetFolder);
+fp.init(window, "Save", nsIFilePicker.modeGetFolder);
 fp.appendFilters(nsIFilePicker.filterAll | nsIFilePicker.filterText);
 
 var rv = fp.show();

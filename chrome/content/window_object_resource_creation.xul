@@ -38,13 +38,19 @@ function onLoad(){
   if(window.arguments[3] == 'e')
   {
    //alert(window.arguments[4]);
-   document.getElementById('menulist_edit_resource').setAttribute('hidden', "false");
+   //document.getElementById('menulist_edit_resource').setAttribute('hidden', "false");
+   var counter=0;
+   var index=0;
    for(var count=0; count < window.arguments[4].itemCount; count++)
    {
+    counter++;
     menuitem = document.createElement('menuitem');
     menuitem.setAttribute('label', window.arguments[4].getItemAtIndex(count).label);
     menuitem.setAttribute('value', window.arguments[4].getItemAtIndex(count).value);
     document.getElementById('menupopup_edit_resource').appendChild(menuitem);
+
+    if(window.arguments[4].getItemAtIndex(count).value == window.arguments[5].value)
+      {index=counter;}
    }
 
    document.getElementById('button_add_resource').setAttribute('label', "Save");
@@ -52,6 +58,30 @@ function onLoad(){
   }
 
    document.getElementById('menulist_type').addEventListener("command", updatePlaceholder, false);
+   //Listeners for validity check for RWE
+   document.getElementById('checkbox_read').addEventListener("command", checkRWE, false);
+   document.getElementById('checkbox_write').addEventListener("command", checkRWE, false);
+   document.getElementById('checkbox_execute').addEventListener("command", checkRWE, false);
+
+   document.getElementById('menulist_edit_resource').selectedIndex = index;
+   fill1();
+}
+
+function checkRWE(event)
+{ var bool = true;
+  var r = document.getElementById('checkbox_read').checked;
+  var w = document.getElementById('checkbox_write').checked;
+  var e = document.getElementById('checkbox_execute').checked;
+
+  if( e==true && (r==true || w==true) )
+    {bool=false;}
+  if(bool==false)
+  {  if(event.target.checked==true)
+       {document.getElementById(event.target.id).checked=false;}
+     else
+       {document.getElementById(event.target.id).checked=true;}
+     alert("Execute and Read|Write cannot be checked simultaneously");
+  }
 }
 
 function updatePlaceholder()
@@ -197,10 +227,10 @@ function refresh()
   //document.getElementById('textbox_create_resource_type').placeholder="string";
 
   document.getElementById('textbox_create_resource_range').value="";
-  document.getElementById('textbox_create_resource_range').placeholder="0-255 bytes";
+  document.getElementById('textbox_create_resource_range').placeholder="0-255";
 
   document.getElementById('textbox_create_resource_units').value="";
-  document.getElementById('textbox_create_resource_units').placeholder="1";
+  document.getElementById('textbox_create_resource_units').placeholder="bytes";
 
   document.getElementById('textbox_create_resource_description').value="";
   document.getElementById('textbox_create_resource_description').placeholder="Resource description goes here";
@@ -270,6 +300,85 @@ function fill()
 
 
 }
+
+
+
+
+
+
+
+
+function fill1()
+{
+  //document.getElementById('textbox_create_resource_id').value = document.getElementById('menulist_edit_resource').selectedItem.value;
+  //document.getElementById('textbox_create_resource_id').value = master_object_window_object_resource_creation.window.arguments[1].name;
+  let x=window.arguments[1];
+  document.getElementById('textbox_create_resource_id').value =  master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].id;
+  document.getElementById('textbox_create_resource_name').value =  master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].name;
+
+  var v = master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].operations;
+  
+  if(v=="-")
+  {document.getElementById('checkbox_read').setAttribute('checked', false);
+   document.getElementById('checkbox_write').setAttribute('checked', false);
+   document.getElementById('checkbox_execute').setAttribute('checked', false);
+  }
+  else
+  {if(v.search("R") != -1)
+     {document.getElementById('checkbox_read').setAttribute('checked', true);}
+   if(v.search("W") != -1)
+     {document.getElementById('checkbox_write').setAttribute('checked', true);}
+   if(v.search("E") != -1)
+     {document.getElementById('checkbox_execute').setAttribute('checked', true);}
+  }
+
+  //document.getElementById('textbox_create_resource_operations').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].operations;
+
+  var v1 = master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].type;
+
+  var v;
+  switch(v1)
+  { case "string" : v = 0; break;
+    case "boolean" : v = 1; break;
+    case "integer" : v = 2; break;
+    case "opaque" : v = 3; break;
+    case "time" : v = 4; break;
+    case "objlnk" : v = 5; break;
+  }
+  document.getElementById('menulist_type').selectedIndex = v;
+
+  //document.getElementById('textbox_create_resource_type').value =  master_object_window_object_resource_creation[x].resourcedefs[document.getElementById('menulist_edit_resource').selectedItem.value].type;
+
+
+  document.getElementById('textbox_create_resource_range').value =  master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].range;
+  document.getElementById('textbox_create_resource_units').value =  master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].units;
+  document.getElementById('textbox_create_resource_description').value =  master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].description;
+
+  if( master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].instancetype == "single")
+  { document.getElementById('radio_create_resource_instance_type_single').setAttribute('selected', true);
+    document.getElementById('radio_create_resource_instance_type_multiple').setAttribute('selected', false);
+  }
+  else if ( master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].instancetype == "multiple" )
+  { document.getElementById('radio_create_resource_instance_type_single').setAttribute('selected', false);
+    document.getElementById('radio_create_resource_instance_type_multiple').setAttribute('selected', true);
+  }
+
+  if( master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].mandatory == true)
+  { document.getElementById('checkbox_create_resource_mandatory').setAttribute('checked', true);
+  }
+  else if( master_object_window_object_resource_creation[x].resourcedefs[window.arguments[5].value].mandatory == false )
+  { document.getElementById('checkbox_create_resource_mandatory').setAttribute('checked', false);
+  }
+
+
+}
+
+
+
+
+
+
+
 
 ]]>
 </script>
@@ -342,11 +451,11 @@ function fill()
          </row>
          <row>
            <label id="label_create_resource_range" value="Resource range:" />
-           <textbox id="textbox_create_resource_range" placeholder="0-255 bytes" />
+           <textbox id="textbox_create_resource_range" placeholder="0-255" />
          </row>
          <row>
            <label id="label_create_resource_units" value="Resource units:" />
-           <textbox id="textbox_create_resource_units" placeholder="1" />
+           <textbox id="textbox_create_resource_units" placeholder="bytes" />
          </row>
          <row>
            <label id="label_create_resource_description" value="Resource description:" />
@@ -355,6 +464,10 @@ function fill()
          <row>
            <spacer flex="1"/>
            <button id="button_add_resource" label="Add Resource" oncommand="createResourceInObject(); updateAddedResouces(); window.opener.update_resource_list(); refresh(); window.close();" />
+         </row>
+         <row>
+           <spacer flex="1"/>
+           <button label="Cancel" oncommand="window.close();" />
          </row>
        </rows>
      </grid>
